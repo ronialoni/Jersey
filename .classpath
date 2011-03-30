@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="il/ac/tau/team3/prayerjersy/PrayerJersyServlet.java" kind="src" path="src"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jettison-1.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jsr107cache-1.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jsr311-api-1.1.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-core-asl-1.7.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-jaxrs-1.7.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-mapper-asl-1.7.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-xc-1.7.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jdo2-api-2.3-eb.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-client-1.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-core-1.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-json-1.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-server-1.6.jar"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine"/>
+	<classpathentry kind="output" path="war/WEB-INF/classes"/>
+</classpath>
