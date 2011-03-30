@@ -15,5 +15,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-core-1.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-json-1.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-server-1.6.jar"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
