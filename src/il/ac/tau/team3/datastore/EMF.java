@@ -1,4 +1,4 @@
-package il.ac.tau.team3.prayerjersy;
+package il.ac.tau.team3.datastore;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;

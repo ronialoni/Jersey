@@ -16,5 +16,11 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-json-1.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-server-1.6.jar"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/geocell-0.0.6.jar" sourcepath="libs/geocell-0.0.6-sources.jar"/>
+	<classpathentry kind="lib" path="libs/geocell-0.0.6-javadoc.jar"/>
+	<classpathentry kind="lib" path="libs/geocell-0.0.6-sources.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="libs/commons-lang-2.6-javadoc.jar"/>
+	<classpathentry kind="lib" path="libs/commons-lang-2.6-sources.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

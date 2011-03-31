@@ -2,9 +2,9 @@ package il.ac.tau.team3.prayerjersy;
 
 import com.google.appengine.api.datastore.Key;
 
+
 import il.ac.tau.team3.common.GeneralUser;
 
-import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
