@@ -78,11 +78,13 @@ public class prayerjersy {
 	public void UpdateUserLocation(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("id") long id){
 		entity.getTransaction().begin();
 		UserLocation userx = entity.find(UserLocation.class, id);
+		if(userx!=null){
 		userx.setLatitude(latitude);
 		userx.setLongitude(longitude);
 		userx.setGeoCellsData(latitude, longitude);
 		entity.getTransaction().commit();
-		
+		}
+		return;
 	}
 	
 	
@@ -156,10 +158,32 @@ public class prayerjersy {
 
 	}
 
-	@DELETE
-	@Consumes("application/json")
-	public void remove(GeneralUser user) {
-
+	@GET
+	@Path("/deleteuser")
+	@Produces(MediaType.APPLICATION_JSON)
+	public boolean removeUser(@QueryParam("id") long id) {
+		entity.getTransaction().begin();
+		UserLocation userx = entity.find(UserLocation.class, id);
+		if(userx!=null){
+		entity.remove(userx); 
+		entity.getTransaction().commit();
+		return true;
+		}
+		return false;
+	}
+	
+	@GET
+	@Path("/deleteplace")
+	@Produces(MediaType.APPLICATION_JSON)
+	public boolean removePlace(@QueryParam("id") long id) {
+		entity.getTransaction().begin();
+		PlaceLocation placex = entity.find(PlaceLocation.class, id);
+		if(placex!=null){
+		entity.remove(placex); 
+		entity.getTransaction().commit();
+		return true;
+		}
+		return false;
 	}
 	
 	private List<UserLocation> requestDatastoreForUsers(double longitude,double latitude,long radius){
