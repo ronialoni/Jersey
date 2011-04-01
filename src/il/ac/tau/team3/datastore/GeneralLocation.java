@@ -43,6 +43,7 @@ public class GeneralLocation {
 		this.latitude = latitude;
 		Point p = new Point(longitude, latitude);
 		geoCellsData = GeocellManager.generateGeoCell(p);
+		
 
 	}
 	
@@ -74,7 +75,8 @@ public class GeneralLocation {
 		return geoCellsData;
 	}
 
-	public void setGeoCellsData(List<String> geocells) {
-		this.geoCellsData = geocells;
+	public void setGeoCellsData(double lat,double longt) {
+		Point p = new Point(longitude, latitude);
+		geoCellsData = GeocellManager.generateGeoCell(p);
 	}
 }

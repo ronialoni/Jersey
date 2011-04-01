@@ -23,33 +23,41 @@ public class ServerCls extends Application {
 	public Set<Class<?>> getClasses() {
 		Set<Class<?>> s = new HashSet<Class<?>>();
 		s.add(prayerjersy.class);
-//		EntityManager entity = EMF.get().createEntityManager();
-////		GeneralLocation loc = new GeneralLocation(23, 25);
-////		entity.getTransaction().begin();
-////		entity.persist(loc);
-////		entity.getTransaction().commit();
-//		
-//		GeneralPlace p = new GeneralPlace("My minyan","12 bla bla st",new SPGeoPoint(23, 25));
-//		
-//		PlaceLocation ploc = new PlaceLocation(p);
+		EntityManager entity = EMF.get().createEntityManager();
+//		GeneralLocation loc = new GeneralLocation(23, 25);
 //		entity.getTransaction().begin();
-//		entity.persist(ploc);
+//		entity.persist(loc);
 //		entity.getTransaction().commit();
-//		
-//		GeneralUser u = new GeneralUser("Roni",new SPGeoPoint(23, 25),"Looking for friends");
-//		
-//		UserLocation uloc = new UserLocation(u);
-//		entity.getTransaction().begin();
-//		entity.persist(uloc);
-//		entity.getTransaction().commit();
-//		
-//		GeocellQuery baseQuery = new GeocellQuery("SELECT x FROM UserLocation x");
-//		
-//
-//		Point center = new Point (25.0, 24.0);
-//		
-//        List<UserLocation> results = GeocellManager.proximitySearch(center, 10, 1000000, UserLocation.class, baseQuery, entity, 13);
-//        System.out.println(results);
+		
+		GeneralPlace p = new GeneralPlace("My minyan122444","12 bla bla st",new SPGeoPoint(23, 25));
+		
+		PlaceLocation ploc = new PlaceLocation(p);
+		entity.getTransaction().begin();
+		entity.persist(ploc);
+		entity.getTransaction().commit();
+		entity.getTransaction().begin();
+		PlaceLocation userx = entity.find(PlaceLocation.class, 119);
+		userx.setAddress("neeee");
+	    //userx.setName(ploc.getName());
+	   // userx.setLatitude(ploc.getLatitude());
+	    //userx.setLongitude(ploc.getLongitude());
+	    //userx.setGeoCellsData(ploc.getLatitude(), ploc.getLongitude());
+		entity.getTransaction().commit();
+		
+		GeneralUser u = new GeneralUser("Roni",new SPGeoPoint(23, 25),"Looking for friends");
+		
+		UserLocation uloc = new UserLocation(u);
+		entity.getTransaction().begin();
+		entity.persist(uloc);
+		entity.getTransaction().commit();
+		
+		GeocellQuery baseQuery = new GeocellQuery("SELECT x FROM UserLocation x");
+		
+
+		Point center = new Point (25.0, 24.0);
+		
+        List<UserLocation> results = GeocellManager.proximitySearch(center, 10, 1000000, UserLocation.class, baseQuery, entity, 13);
+        System.out.println(results);
 		return s;
 	}
 	
