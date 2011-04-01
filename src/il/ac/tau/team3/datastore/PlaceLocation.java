@@ -1,16 +1,27 @@
 package il.ac.tau.team3.datastore;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.OneToMany;
 
 import java.util.List;
 
 import il.ac.tau.team3.common.GeneralPlace;
 
+@Entity 
+@Inheritance
 public class PlaceLocation extends GeneralLocation{
+	
+	
 	private String name;
 	private String address;
 	private List<String> minyanJoiners;
 	
-	public PlaceLocation(double longitude, double latitude, GeneralPlace place ) {
-		super(longitude, latitude);
+	public PlaceLocation(GeneralPlace place ) {
+		super(place.getSpGeoPoint().getLongitudeInDegrees(), place.getSpGeoPoint().getLatitudeInDegrees());
 		this.name = place.getName();
 		this.address = place.getAddress();
 		

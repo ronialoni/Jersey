@@ -8,6 +8,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 
 import com.beoui.geocell.GeocellManager;
@@ -17,6 +19,8 @@ import com.beoui.geocell.annotations.Longitude;
 import com.beoui.geocell.model.Point;
 
 @Entity
+@MappedSuperclass
+
 public class GeneralLocation {
 	
 	@Id
