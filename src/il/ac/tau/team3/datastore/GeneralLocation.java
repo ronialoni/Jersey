@@ -23,6 +23,16 @@ public class GeneralLocation {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@Longitude
+	double longitude;
+
+	@Latitude
+	double latitude;
+
+	@Geocells
+	@OneToMany(fetch = FetchType.EAGER)
+	private List<String> geoCellsData = new ArrayList<String>();
+	
 	public GeneralLocation(double longitude, double latitude) {
 		super();
 		this.longitude = longitude;
@@ -37,15 +47,7 @@ public class GeneralLocation {
     }
 
 
-	@Longitude
-	double longitude;
-
-	@Latitude
-	double latitude;
-
-	@Geocells
-	@OneToMany(fetch = FetchType.EAGER)
-	private List<String> geoCellsData = new ArrayList<String>();
+	
 
 
 	public double getLongitude() {

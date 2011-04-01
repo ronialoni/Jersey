@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import il.ac.tau.team3.common.GeneralPlace;
 import il.ac.tau.team3.common.GeneralUser;
 import il.ac.tau.team3.common.SPGeoPoint;
 import il.ac.tau.team3.common.User;
@@ -26,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 public class prayerjersy {
 
 	private volatile static List<GeneralUser> users;
+	private volatile static List<GeneralPlace> places;
 	private static final Logger log = Logger.getLogger(ServerCls.class
 			.getName());
 
@@ -39,6 +41,10 @@ public class prayerjersy {
 				3600, 4300), "Looking for something to cook...");
 		GeneralUser otheruser3 = new GeneralUser("Server Matan",
 				new SPGeoPoint(3600, 4400), "Looking for Minyan");
+		places = new ArrayList<GeneralPlace>();
+		GeneralPlace place = new GeneralPlace("Minyan1", "10 hashomer st.,tel aviv", new SPGeoPoint(
+				3601, 4301));
+		places.add(place);
 		users.add(user);
 		users.add(otheruser1);
 		users.add(otheruser2);
@@ -46,17 +52,33 @@ public class prayerjersy {
 	}
 
 	@GET
-	@Path("{id}")
+	@Path("/user/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public GeneralUser retrieve(@PathParam("id") int id) {
-
-		return users.get(id);
+	public GeneralUser retrieveUser(@PathParam("id") int id) {
+		if(id < users.size()) return users.get(id);
+		else return null;
+	}
+	
+	@GET
+	@Path("/place/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public GeneralPlace retrievePlace(@PathParam("id") int id) {
+		if (id < places.size()) return places.get(id);
+		else return null;
 	}
 
 	@GET
+	@Path("/user")
 	@Produces("application/json")
 	public Integer getNumUsers() {
 		return users.size();
+	}
+	
+	@GET
+	@Path("/place")
+	@Produces("application/json")
+	public Integer getNumPlaces() {
+		return places.size();
 	}
 
 	@PUT
