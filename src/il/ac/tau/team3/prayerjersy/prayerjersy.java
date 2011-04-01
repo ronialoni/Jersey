@@ -82,6 +82,7 @@ public class prayerjersy {
 		userx.setLongitude(longitude);
 		userx.setGeoCellsData(latitude, longitude);
 		entity.getTransaction().commit();
+		
 	}
 	
 	
