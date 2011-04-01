@@ -8,7 +8,10 @@ import il.ac.tau.team3.common.GeneralPlace;
 import il.ac.tau.team3.common.GeneralUser;
 import il.ac.tau.team3.common.SPGeoPoint;
 import il.ac.tau.team3.common.User;
+import il.ac.tau.team3.datastore.EMF;
+import il.ac.tau.team3.datastore.UserLocation;
 
+import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -21,6 +24,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.beoui.geocell.GeocellManager;
+import com.beoui.geocell.model.GeocellQuery;
+import com.beoui.geocell.model.Point;
+import com.google.appengine.api.users.UserService;
+
 //The Java class will be hosted at the URI path "/helloworld"
 
 @Path("/prayerjersy")
@@ -30,6 +38,7 @@ public class prayerjersy {
 	private volatile static List<GeneralPlace> places;
 	private static final Logger log = Logger.getLogger(ServerCls.class
 			.getName());
+	private EntityManager entity;
 
 	public prayerjersy() {
 		users = new ArrayList<GeneralUser>();
@@ -37,7 +46,7 @@ public class prayerjersy {
 				"An orthodax extremest");
 		GeneralUser otheruser1 = new GeneralUser("Server Aviad",
 				new SPGeoPoint(3600, 4200), "Looking for Minyan");
-		GeneralUser otheruser2 = new GeneralUser("Server Roni", new SPGeoPoint(
+		GeneralUser otheruser2 = new GeneralUser("Server Baloni", new SPGeoPoint(
 				3600, 4300), "Looking for something to cook...");
 		GeneralUser otheruser3 = new GeneralUser("Server Matan",
 				new SPGeoPoint(3600, 4400), "Looking for Minyan");
@@ -49,14 +58,38 @@ public class prayerjersy {
 		users.add(otheruser1);
 		users.add(otheruser2);
 		users.add(otheruser3);
+		entity = EMF.get().createEntityManager();
 	}
 
 	@GET
 	@Path("/user/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public GeneralUser retrieveUser(@PathParam("id") int id) {
-		if(id < users.size()) return users.get(id);
+		if(id < users.size()){
+			return users.get(id);
+		}
 		else return null;
+	}
+	
+	@GET
+	@Path("/users")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<GeneralUser> retrieveAllUsers(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("radius")long radius) {
+		return convertServerUserObjToClientUserObj(requestDatastoreForUsers(longitude, latitude, radius));
+	}
+	
+	@GET
+	@Path("/newuser")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Long CreateNewUser(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("name")String name,@QueryParam("status")String status) {
+		GeneralUser u = new GeneralUser(name,new SPGeoPoint((int)latitude*1000000, (int)longitude*1000000),status);
+		
+		UserLocation uloc = new UserLocation(u);
+		entity.getTransaction().begin();
+		entity.persist(uloc);
+		entity.getTransaction().commit();
+		
+		return uloc.getKey();
 	}
 	
 	@GET
@@ -91,6 +124,23 @@ public class prayerjersy {
 	@Consumes("application/json")
 	public void remove(GeneralUser user) {
 
+	}
+	
+	private List<UserLocation> requestDatastoreForUsers(double longitude,double latitude,long radius){
+		GeocellQuery baseQuery = new GeocellQuery("SELECT x FROM UserLocation x");
+		Point center = new Point (latitude, longitude);
+		List<UserLocation> results = GeocellManager.proximitySearch(center, 10, radius, UserLocation.class, baseQuery, entity, 13);
+		return results;
+	}
+	
+	private List<GeneralUser> convertServerUserObjToClientUserObj(List<UserLocation> serverUsers){
+		List<GeneralUser> returnList = new ArrayList<GeneralUser>();
+		for(UserLocation serverUser : serverUsers){
+			GeneralUser tmp = new GeneralUser(serverUser.getName(),new SPGeoPoint((int)serverUser.getLatitude()*1000000, (int)serverUser.getLongitude()*1000000),serverUser.getStatus());
+			returnList.add(tmp);
+			
+		}
+		return returnList;
 	}
 
 }
