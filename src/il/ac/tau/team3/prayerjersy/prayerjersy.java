@@ -56,9 +56,9 @@ public class prayerjersy {
 	}
 	
 	@GET
-	@Path("/updateuser")
+	@Path("/updateuserbyid")
 	@Produces(MediaType.APPLICATION_JSON)
-	public void UpdateUserLocation(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("id") long id){
+	public void UpdateUserLocationById(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("id") long id){
 		entity.getTransaction().begin();
 		UserLocation userx = entity.find(UserLocation.class, id);
 		if(userx!=null){
@@ -67,6 +67,25 @@ public class prayerjersy {
 			userx.setGeoCellsData(latitude, longitude);
 			entity.getTransaction().commit();
 		}
+		return;
+	}
+	
+	@PUT
+	@Path("/updateuserbyname")
+	@Produces(MediaType.APPLICATION_JSON)
+	public void UpdateUserLocationByName(GeneralUser user){
+		entity.getTransaction().begin();
+		UserLocation userx = entity.find(UserLocation.class, user.getName());
+		if(userx==null){
+			this.createUserInDS(user.getSpGeoPoint().getLongitudeInDegrees(), user.getSpGeoPoint().getLatitudeInDegrees(), user.getName(), user.getStatus());
+			return;
+		}
+		
+		userx.setLatitude(user.getSpGeoPoint().getLatitudeInDegrees());
+		userx.setLongitude(user.getSpGeoPoint().getLongitudeInDegrees());
+		userx.setGeoCellsData(user.getSpGeoPoint().getLatitudeInDegrees(), user.getSpGeoPoint().getLongitudeInDegrees());
+		userx.setStatus(user.getStatus());
+		entity.getTransaction().commit();
 		return;
 	}
 	
@@ -89,14 +108,7 @@ public class prayerjersy {
 	@Path("/newuser")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Long CreateNewUser(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("name")String name,@QueryParam("status")String status) {
-		GeneralUser u = new GeneralUser(name,new SPGeoPoint((int)latitude*1000000, (int)longitude*1000000),status);
-		
-		UserLocation uloc = new UserLocation(u);
-		entity.getTransaction().begin();
-		entity.persist(uloc);
-		entity.getTransaction().commit();
-		
-		return uloc.getKey();
+		return this.createUserInDS(longitude, latitude, name, status);
 	}
 	
 	@GET
@@ -215,5 +227,15 @@ public class prayerjersy {
 			
 		}
 		return returnList;
+	}
+	
+	private Long createUserInDS(double longitude, double latitude, String name,String status){
+		GeneralUser u = new GeneralUser(name,new SPGeoPoint((int)latitude*1000000, (int)longitude*1000000),status);
+		UserLocation uloc = new UserLocation(u);
+		entity.getTransaction().begin();
+		entity.persist(uloc);
+		entity.getTransaction().commit();
+		
+		return uloc.getKey();
 	}
 }
