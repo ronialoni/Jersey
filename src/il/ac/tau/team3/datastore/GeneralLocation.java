@@ -22,7 +22,6 @@ import com.beoui.geocell.model.Point;
 @MappedSuperclass
 
 public class GeneralLocation {
-	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

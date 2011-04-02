@@ -14,8 +14,7 @@ import il.ac.tau.team3.common.GeneralPlace;
 @Entity 
 @Inheritance
 public class PlaceLocation extends GeneralLocation{
-	
-	
+		
 	private String name;
 	private String address;
 	private List<String> minyanJoiners;

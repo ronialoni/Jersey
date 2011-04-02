@@ -11,7 +11,6 @@ import il.ac.tau.team3.common.SPGeoPoint;
 public class UserLocation extends GeneralLocation{
 	
 	private String name;
-	
 	private String status;
 	
 	public UserLocation(GeneralUser user) {

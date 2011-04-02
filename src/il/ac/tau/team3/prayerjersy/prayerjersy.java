@@ -79,10 +79,10 @@ public class prayerjersy {
 		entity.getTransaction().begin();
 		UserLocation userx = entity.find(UserLocation.class, id);
 		if(userx!=null){
-		userx.setLatitude(latitude);
-		userx.setLongitude(longitude);
-		userx.setGeoCellsData(latitude, longitude);
-		entity.getTransaction().commit();
+			userx.setLatitude(latitude);
+			userx.setLongitude(longitude);
+			userx.setGeoCellsData(latitude, longitude);
+			entity.getTransaction().commit();
 		}
 		return;
 	}
