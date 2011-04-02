@@ -199,6 +199,7 @@ public class prayerjersy {
 		return results;
 	}
 	
+	
 	private List<GeneralUser> convertServerUserObjToClientUserObj(List<UserLocation> serverUsers){
 		List<GeneralUser> returnList = new ArrayList<GeneralUser>();
 		for(UserLocation serverUser : serverUsers){
