@@ -198,6 +198,24 @@ public class prayerjersy {
 		return false;
 	}
 	
+	@POST
+	@Path("/addjoinerbyid")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public boolean AddJoinerByPlaceId(@QueryParam("joiner")String joiner, @QueryParam("id") long id){
+		entity.getTransaction().begin();
+		PlaceLocation placex =
+
+			entity.find(PlaceLocation.class, id);
+		if(placex!=null){
+			placex.addJoiner(joiner);
+
+			entity.getTransaction().commit();
+			return true;
+		}
+
+		return false;
+	}
+	
 	@GET
 	@Path("/deleteplace")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -229,7 +247,7 @@ public class prayerjersy {
 	private List<GeneralUser> convertServerUserObjToClientUserObj(List<UserLocation> serverUsers){
 		List<GeneralUser> returnList = new ArrayList<GeneralUser>();
 		for(UserLocation serverUser : serverUsers){
-			GeneralUser tmp = new GeneralUser(serverUser.getName(),new SPGeoPoint((int)serverUser.getLatitude()*1000000, (int)serverUser.getLongitude()*1000000),serverUser.getStatus());
+			GeneralUser tmp = new GeneralUser(serverUser.getName(),new SPGeoPoint((int)(serverUser.getLatitude()*1000000), (int)(serverUser.getLongitude()*1000000)),serverUser.getStatus());
 			returnList.add(tmp);
 			
 		}
@@ -239,7 +257,7 @@ public class prayerjersy {
 	private List<GeneralPlace> convertServerPlaceObjToClientPlaceObj(List<PlaceLocation> serverPlaces){
 		List<GeneralPlace> returnList = new ArrayList<GeneralPlace>();
 		for(PlaceLocation serverPlace : serverPlaces){
-			GeneralPlace tmp = new GeneralPlace(serverPlace.getName(),serverPlace.getAddress(),new SPGeoPoint((int)serverPlace.getLatitude()*1000000, (int)serverPlace.getLongitude()*1000000));
+			GeneralPlace tmp = new GeneralPlace(serverPlace.getName(),serverPlace.getAddress(),new SPGeoPoint((int)(serverPlace.getLatitude()*1000000), (int)(serverPlace.getLongitude()*1000000)));
 			returnList.add(tmp);
 			
 		}
