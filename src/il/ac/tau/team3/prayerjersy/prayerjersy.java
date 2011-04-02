@@ -1,5 +1,6 @@
 package il.ac.tau.team3.prayerjersy;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -17,6 +18,7 @@ import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -25,6 +27,7 @@ import javax.ws.rs.Path;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import com.beoui.geocell.GeocellManager;
 import com.beoui.geocell.model.GeocellQuery;
@@ -36,8 +39,6 @@ import com.google.appengine.api.users.UserService;
 @Path("/prayerjersy")
 public class prayerjersy {
 
-	private volatile static List<GeneralUser> users;
-	private volatile static List<GeneralPlace> places;
 	private static final Logger log = Logger.getLogger(ServerCls.class
 			.getName());
 	private EntityManager entity;
@@ -46,7 +47,7 @@ public class prayerjersy {
 		entity = EMF.get().createEntityManager();
 	}
 
-	@GET
+	/*@GET
 	@Path("/user/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public GeneralUser retrieveUser(@PathParam("id") int id) {
@@ -55,7 +56,7 @@ public class prayerjersy {
 		}
 		else return null;
 	}
-	
+	*/
 	@GET
 	@Path("/updateuserbyid")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -72,17 +73,17 @@ public class prayerjersy {
 		return false;
 	}
 	
-	@PUT
+	@POST
 	@Path("/updateuserbyname")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void UpdateUserLocationByName(GeneralUser user){
+	public Response UpdateUserLocationByName(GeneralUser user){
 		
 		Query q = entity.createQuery("SELECT x FROM UserLocation x WHERE x.name='"+user.getName()+"'");
 		 
 		
 		if(q.getResultList().size() == 0){
 			this.createUserInDS(user.getSpGeoPoint().getLongitudeInDegrees(), user.getSpGeoPoint().getLatitudeInDegrees(), user.getName(), user.getStatus());
-			return;
+			return Response.status(Response.Status.ACCEPTED).build();
 		}
 		
 		UserLocation userx = (UserLocation)q.getResultList().get(0);
@@ -92,22 +93,46 @@ public class prayerjersy {
 		userx.setGeoCellsData(user.getSpGeoPoint().getLatitudeInDegrees(), user.getSpGeoPoint().getLongitudeInDegrees());
 		userx.setStatus(user.getStatus());
 		entity.getTransaction().commit();
-		return;
+		
+		return Response.status(Response.Status.ACCEPTED).build();
 	}
+	
+	@POST
+	@Path("/updateplacebylocation")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response UpdatePlaceLocationByLocation(GeneralPlace place){
+		
+		Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE " +
+				"x.latitude="+place.getSpGeoPoint().getLatitudeInDegrees()+" AND x.longitude="+place.getSpGeoPoint().getLongitudeInDegrees());
+		 
+		
+		//if(q.getResultList().size() == 0){
+			createPlaceInDS(place.getSpGeoPoint().getLongitudeInDegrees(), place.getSpGeoPoint().getLatitudeInDegrees(), place.getName(), place.getAddress());
+			return Response.status(Response.Status.ACCEPTED).build();
+		//}
+		
+		// register changed place in DS
+		/*entity.getTransaction().begin();
+		
+		entity.getTransaction().commit();*/
+		
+		//return Response.status(Response.Status.ACCEPTED).build();
+	}
+	
 	
 	
 	@GET
 	@Path("/users")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<GeneralUser> retrieveAllUsers(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("radius")long radius) {
-		return convertServerUserObjToClientUserObj(requestDatastoreForUsers(longitude, latitude, radius));
+	public GeneralUser[] retrieveAllUsers(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("radius")long radius) {
+		return convertServerUserObjToClientUserObj(requestDatastoreForUsers(longitude, latitude, radius)).toArray(new GeneralUser[0]);
 	}
 	
 	@GET
 	@Path("/places")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<GeneralPlace> retrieveAllPlaces(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("radius")long radius) {
-		return convertServerPlaceObjToClientPlaceObj(requestDatastoreForPlaces(longitude, latitude, radius));
+	public GeneralPlace[] retrieveAllPlaces(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("radius")long radius) {
+		return convertServerPlaceObjToClientPlaceObj(requestDatastoreForPlaces(longitude, latitude, radius)).toArray(new GeneralPlace[0]);
 	}
 	
 	@GET
@@ -117,7 +142,7 @@ public class prayerjersy {
 		return this.createUserInDS(longitude, latitude, name, status);
 	}
 	
-	@GET
+	/*@GET
 	@Path("/newplace")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Long CreateNewPlace(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("name")String name,@QueryParam("status")String address) {
@@ -129,7 +154,7 @@ public class prayerjersy {
 		entity.getTransaction().commit();
 		
 		return uloc.getKey();
-	}
+	}*/
 	
 	@GET
 	@Path("/signtoplace")
@@ -145,28 +170,14 @@ public class prayerjersy {
 		return false;
 	}
 	
-	@GET
+/*	@GET
 	@Path("/place/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public GeneralPlace retrievePlace(@PathParam("id") int id) {
 		if (id < places.size()) return places.get(id);
 		else return null;
 	}
-
-	@GET
-	@Path("/user")
-	@Produces("application/json")
-	public Integer getNumUsers() {
-		return users.size();
-	}
-	
-	@GET
-	@Path("/place")
-	@Produces("application/json")
-	public Integer getNumPlaces() {
-		return places.size();
-	}
-
+*/
 	@PUT
 	@Consumes("application/json")
 	public void store(GeneralUser user) {
@@ -204,13 +215,13 @@ public class prayerjersy {
 	private List<UserLocation> requestDatastoreForUsers(double longitude,double latitude,long radius){
 		GeocellQuery baseQuery = new GeocellQuery("SELECT x FROM UserLocation x");
 		Point center = new Point (latitude, longitude);
-		List<UserLocation> results = GeocellManager.proximitySearch(center, 10, radius, UserLocation.class, baseQuery, entity, 13);
+		List<UserLocation> results = GeocellManager.proximitySearch(center, 100000000, radius, UserLocation.class, baseQuery, entity, 13);
 		return results;
 	}
 	private List<PlaceLocation> requestDatastoreForPlaces(double longitude,double latitude,long radius){
 		GeocellQuery baseQuery = new GeocellQuery("SELECT x FROM PlaceLocation x");
 		Point center = new Point (latitude, longitude);
-		List<PlaceLocation> results = GeocellManager.proximitySearch(center, 10, radius, PlaceLocation.class, baseQuery, entity, 13);
+		List<PlaceLocation> results = GeocellManager.proximitySearch(center, 100000000, radius, PlaceLocation.class, baseQuery, entity, 13);
 		return results;
 	}
 	
@@ -236,8 +247,18 @@ public class prayerjersy {
 	}
 	
 	private Long createUserInDS(double longitude, double latitude, String name,String status){
-		GeneralUser u = new GeneralUser(name,new SPGeoPoint((int)latitude*1000000, (int)longitude*1000000),status);
+		GeneralUser u = new GeneralUser(name,new SPGeoPoint((int)(latitude*1000000), (int)(longitude*1000000)),status);
 		UserLocation uloc = new UserLocation(u);
+		entity.getTransaction().begin();
+		entity.persist(uloc);
+		entity.getTransaction().commit();
+		
+		return uloc.getKey();
+	}
+	
+	private Long createPlaceInDS(double longitude, double latitude, String name, String address){
+		GeneralPlace u = new GeneralPlace(name,address,new SPGeoPoint((int)(latitude*1000000), (int)(longitude*1000000)));
+		PlaceLocation uloc = new PlaceLocation(u);
 		entity.getTransaction().begin();
 		entity.persist(uloc);
 		entity.getTransaction().commit();
