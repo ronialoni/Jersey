@@ -72,7 +72,7 @@ public class prayerjersy {
 	
 	@PUT
 	@Path("/updateuserbyname")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
 	public void UpdateUserLocationByName(GeneralUser user){
 		entity.getTransaction().begin();
 		UserLocation userx = entity.find(UserLocation.class, user.getName());
