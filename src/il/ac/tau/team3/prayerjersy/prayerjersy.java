@@ -13,6 +13,7 @@ import il.ac.tau.team3.datastore.PlaceLocation;
 import il.ac.tau.team3.datastore.UserLocation;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -75,13 +76,17 @@ public class prayerjersy {
 	@Path("/updateuserbyname")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void UpdateUserLocationByName(GeneralUser user){
-		entity.getTransaction().begin();
-		UserLocation userx = entity.find(UserLocation.class, user.getName());
-		if(userx==null){
+		
+		Query q = entity.createQuery("SELECT x FROM UserLocation x WHERE x.name='"+user.getName()+"'");
+		 
+		
+		if(q.getResultList().size() == 0){
 			this.createUserInDS(user.getSpGeoPoint().getLongitudeInDegrees(), user.getSpGeoPoint().getLatitudeInDegrees(), user.getName(), user.getStatus());
 			return;
 		}
 		
+		UserLocation userx = (UserLocation)q.getResultList().get(0);
+		entity.getTransaction().begin();
 		userx.setLatitude(user.getSpGeoPoint().getLatitudeInDegrees());
 		userx.setLongitude(user.getSpGeoPoint().getLongitudeInDegrees());
 		userx.setGeoCellsData(user.getSpGeoPoint().getLatitudeInDegrees(), user.getSpGeoPoint().getLongitudeInDegrees());
