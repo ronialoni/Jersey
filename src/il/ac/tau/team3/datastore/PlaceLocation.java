@@ -42,5 +42,15 @@ public class PlaceLocation extends GeneralLocation{
 	public void setAddress(String address) {
 		this.address = address;
 	}
+	
+	public void addJoiner(String name){
+		this.minyanJoiners.add(name);
+		return;
+	}
+	
+	public void removeJoiner(String name){
+		this.minyanJoiners.remove(name);
+		return;
+	}
 
 }

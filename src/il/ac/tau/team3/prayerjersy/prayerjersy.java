@@ -42,23 +42,6 @@ public class prayerjersy {
 	private EntityManager entity;
 
 	public prayerjersy() {
-		users = new ArrayList<GeneralUser>();
-		User user = new User("Server Tomer", new SPGeoPoint(3600, 4100),
-				"An orthodax extremest");
-		GeneralUser otheruser1 = new GeneralUser("Server Aviad",
-				new SPGeoPoint(3600, 4200), "Looking for Minyan");
-		GeneralUser otheruser2 = new GeneralUser("Server Baloni", new SPGeoPoint(
-				3600, 4300), "Looking for something to cook...");
-		GeneralUser otheruser3 = new GeneralUser("Server Matan",
-				new SPGeoPoint(3600, 4400), "Looking for Minyan");
-		places = new ArrayList<GeneralPlace>();
-		GeneralPlace place = new GeneralPlace("Minyan1", "10 hashomer st.,tel aviv", new SPGeoPoint(
-				3601, 4301));
-		places.add(place);
-		users.add(user);
-		users.add(otheruser1);
-		users.add(otheruser2);
-		users.add(otheruser3);
 		entity = EMF.get().createEntityManager();
 	}
 
@@ -128,6 +111,20 @@ public class prayerjersy {
 		entity.getTransaction().commit();
 		
 		return uloc.getKey();
+	}
+	
+	@GET
+	@Path("/signtoplace")
+	@Produces(MediaType.APPLICATION_JSON)
+	public boolean SignToPlace(@QueryParam("id") long id,  @QueryParam("name")String name) {
+		entity.getTransaction().begin();
+		PlaceLocation placex = entity.find(PlaceLocation.class, id);
+		if(placex!=null){
+			placex.addJoiner(name);
+			entity.getTransaction().commit();
+			return true;
+		}
+		return false;
 	}
 	
 	@GET
