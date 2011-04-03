@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import il.ac.tau.team3.common.GeneralPlace;
 import il.ac.tau.team3.common.GeneralUser;
 import il.ac.tau.team3.common.SPGeoPoint;
-import il.ac.tau.team3.common.User;
 import il.ac.tau.team3.datastore.EMF;
 import il.ac.tau.team3.datastore.PlaceLocation;
 import il.ac.tau.team3.datastore.UserLocation;
@@ -73,20 +72,23 @@ public class prayerjersy {
 		return false;
 	}
 	
+	
+	
 	@POST
 	@Path("/updateuserbyname")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response UpdateUserLocationByName(GeneralUser user){
+	public Long UpdateUserLocationByName(GeneralUser user){
 		
 		Query q = entity.createQuery("SELECT x FROM UserLocation x WHERE x.name='"+user.getName()+"'");
 		 
-		
-		if(q.getResultList().size() == 0){
-			this.createUserInDS(user.getSpGeoPoint().getLongitudeInDegrees(), user.getSpGeoPoint().getLatitudeInDegrees(), user.getName(), user.getStatus());
-			return Response.status(Response.Status.ACCEPTED).build();
+		List<UserLocation> list = q.getResultList();
+		if(list.isEmpty()){
+			return this.createUserInDS(user.getSpGeoPoint().getLongitudeInDegrees(), user.getSpGeoPoint().getLatitudeInDegrees(), user.getName(), user.getStatus());
+			// return Response.status(Response.Status.ACCEPTED).build();
+			 
 		}
 		
-		UserLocation userx = (UserLocation)q.getResultList().get(0);
+		UserLocation userx = (UserLocation)list.get(0);
 		entity.getTransaction().begin();
 		userx.setLatitude(user.getSpGeoPoint().getLatitudeInDegrees());
 		userx.setLongitude(user.getSpGeoPoint().getLongitudeInDegrees());
@@ -94,21 +96,22 @@ public class prayerjersy {
 		userx.setStatus(user.getStatus());
 		entity.getTransaction().commit();
 		
-		return Response.status(Response.Status.ACCEPTED).build();
+		return userx.getKey();
+		//return Response.status(Response.Status.ACCEPTED).build();
 	}
 	
 	@POST
 	@Path("/updateplacebylocation")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response UpdatePlaceLocationByLocation(GeneralPlace place){
+	public Long UpdatePlaceLocationByLocation(GeneralPlace place){
 		
-		Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE " +
-				"x.latitude="+place.getSpGeoPoint().getLatitudeInDegrees()+" AND x.longitude="+place.getSpGeoPoint().getLongitudeInDegrees());
+		//Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE " +
+		//		"x.latitude="+place.getSpGeoPoint().getLatitudeInDegrees()+" AND x.longitude="+place.getSpGeoPoint().getLongitudeInDegrees());
 		 
 		
 		//if(q.getResultList().size() == 0){
-			createPlaceInDS(place.getSpGeoPoint().getLongitudeInDegrees(), place.getSpGeoPoint().getLatitudeInDegrees(), place.getName(), place.getAddress());
-			return Response.status(Response.Status.ACCEPTED).build();
+			return createPlaceInDS(place);
+			//return Response.status(Response.Status.ACCEPTED).build();
 		//}
 		
 		// register changed place in DS
@@ -119,6 +122,24 @@ public class prayerjersy {
 		//return Response.status(Response.Status.ACCEPTED).build();
 	}
 	
+	@POST
+	@Path("/addjoiner")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response UpdatePlaceJoinersByName(GeneralPlace place){
+		
+		//Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE x.id='"+place.getId()+"'");
+		 
+		
+		//PlaceLocation placex = (PlaceLocation)q.getResultList().get(0);
+		PlaceLocation placex = entity.find(PlaceLocation.class, place.getId());
+		if(placex!=null){
+			entity.getTransaction().begin();
+			placex.setAllJoiners(place.getAllJoiners());
+			entity.getTransaction().commit();
+		}
+		return Response.status(Response.Status.ACCEPTED).build();
+		
+	}
 	
 	
 	@GET
@@ -248,6 +269,7 @@ public class prayerjersy {
 		List<GeneralUser> returnList = new ArrayList<GeneralUser>();
 		for(UserLocation serverUser : serverUsers){
 			GeneralUser tmp = new GeneralUser(serverUser.getName(),new SPGeoPoint((int)(serverUser.getLatitude()*1000000), (int)(serverUser.getLongitude()*1000000)),serverUser.getStatus());
+			tmp.setId(serverUser.getKey());
 			returnList.add(tmp);
 			
 		}
@@ -258,6 +280,8 @@ public class prayerjersy {
 		List<GeneralPlace> returnList = new ArrayList<GeneralPlace>();
 		for(PlaceLocation serverPlace : serverPlaces){
 			GeneralPlace tmp = new GeneralPlace(serverPlace.getName(),serverPlace.getAddress(),new SPGeoPoint((int)(serverPlace.getLatitude()*1000000), (int)(serverPlace.getLongitude()*1000000)));
+			tmp.setId(serverPlace.getKey());
+			tmp.setAllJoiners(new ArrayList<String>(serverPlace.getAllJoiners()));
 			returnList.add(tmp);
 			
 		}
@@ -274,9 +298,9 @@ public class prayerjersy {
 		return uloc.getKey();
 	}
 	
-	private Long createPlaceInDS(double longitude, double latitude, String name, String address){
-		GeneralPlace u = new GeneralPlace(name,address,new SPGeoPoint((int)(latitude*1000000), (int)(longitude*1000000)));
-		PlaceLocation uloc = new PlaceLocation(u);
+	private Long createPlaceInDS(GeneralPlace place){
+		//GeneralPlace u = new GeneralPlace(name,address,new SPGeoPoint((int)(latitude*1000000), (int)(longitude*1000000)));
+		PlaceLocation uloc = new PlaceLocation(place);
 		entity.getTransaction().begin();
 		entity.persist(uloc);
 		entity.getTransaction().commit();

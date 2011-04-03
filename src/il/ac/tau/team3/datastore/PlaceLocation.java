@@ -13,7 +13,7 @@ import il.ac.tau.team3.common.GeneralPlace;
 
 @Entity 
 @Inheritance
-public class PlaceLocation extends GeneralLocation{
+public class PlaceLocation extends GeneralLocation {
 		
 	private String name;
 	private String address;
@@ -23,6 +23,7 @@ public class PlaceLocation extends GeneralLocation{
 		super(place.getSpGeoPoint().getLongitudeInDegrees(), place.getSpGeoPoint().getLatitudeInDegrees());
 		this.name = place.getName();
 		this.address = place.getAddress();
+		this.minyanJoiners = place.getAllJoiners();
 		
 		// TODO Auto-generated constructor stub
 	}
@@ -52,5 +53,12 @@ public class PlaceLocation extends GeneralLocation{
 		this.minyanJoiners.remove(name);
 		return;
 	}
-
+	
+	public List<String> getAllJoiners(){
+		return this.minyanJoiners;
+	}
+	
+	public void setAllJoiners(List<String> joiners){
+		this.minyanJoiners = joiners;
+	}
 }
