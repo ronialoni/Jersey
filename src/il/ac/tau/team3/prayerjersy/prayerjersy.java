@@ -40,6 +40,7 @@ public class prayerjersy {
 
 	private static final Logger log = Logger.getLogger(ServerCls.class
 			.getName());
+	private static final int DEFAULT_SEARCH_RESOlUTION = 1;
 	private EntityManager entity;
 
 	public prayerjersy() {
@@ -254,13 +255,13 @@ public class prayerjersy {
 	private List<UserLocation> requestDatastoreForUsers(double longitude,double latitude,long radius){
 		GeocellQuery baseQuery = new GeocellQuery("SELECT x FROM UserLocation x");
 		Point center = new Point (latitude, longitude);
-		List<UserLocation> results = GeocellManager.proximitySearch(center, 100000000, radius, UserLocation.class, baseQuery, entity, 13);
+		List<UserLocation> results = GeocellManager.proximitySearch(center, 100000000, radius, UserLocation.class, baseQuery, entity, DEFAULT_SEARCH_RESOlUTION);
 		return results;
 	}
 	private List<PlaceLocation> requestDatastoreForPlaces(double longitude,double latitude,long radius){
 		GeocellQuery baseQuery = new GeocellQuery("SELECT x FROM PlaceLocation x");
 		Point center = new Point (latitude, longitude);
-		List<PlaceLocation> results = GeocellManager.proximitySearch(center, 100000000, radius, PlaceLocation.class, baseQuery, entity, 13);
+		List<PlaceLocation> results = GeocellManager.proximitySearch(center, 100000000, radius, PlaceLocation.class, baseQuery, entity, DEFAULT_SEARCH_RESOlUTION);
 		return results;
 	}
 	
