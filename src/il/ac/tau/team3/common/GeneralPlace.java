@@ -62,4 +62,8 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 	public void setAllJoiners(ArrayList<String> joiners){
 		this.minyanJoiners = joiners;
 	}
+	
+	public boolean IsJoinerSigned(String joiner){
+	    	return (this.minyanJoiners.contains(joiner));
+	    }
 }
