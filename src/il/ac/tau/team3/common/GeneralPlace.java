@@ -7,7 +7,7 @@ import java.util.List;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class GeneralPlace extends GeneralLocation implements Serializable{
 	
 	/**
@@ -15,18 +15,18 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 	 */
 	private static final long serialVersionUID = 3680632953183211194L;
 	private String address;
-	private ArrayList<String> minyanJoiners;
+	private List<String> allJoiners;
 		
 	
 	public GeneralPlace(){
 		super();
-		//this.minyanJoiners = new ArrayList<String>();
+		this.allJoiners = new ArrayList<String>();
 	}
 	
 	public GeneralPlace(String name, String address , SPGeoPoint spGeoPoint){
 		super(spGeoPoint,name);
 		this.address = address;
-		this.minyanJoiners = new ArrayList<String>();
+		this.allJoiners = new ArrayList<String>();
 	}
 
 	public String getAddress() {
@@ -37,33 +37,46 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 		this.address = address;
 	}
 	
-	
+	@JsonIgnore
 	public void addJoiner(String name){
-		if(minyanJoiners == null){
-			this.minyanJoiners = new ArrayList<String>();
+		if(allJoiners == null){
+			this.allJoiners = new ArrayList<String>();
 		}
-		minyanJoiners.add(name);
+		allJoiners.add(name);
 		return;
 	}
 	
+	@JsonIgnore
 	public void removeJoiner(String name){
-		if(minyanJoiners!=null){
-			minyanJoiners.remove(name);
+		if(allJoiners!=null){
+			allJoiners.remove(name);
 		}
 		return;
 	}
 	
 	//@JsonIgnore
-	public ArrayList<String> getAllJoiners(){
-		return this.minyanJoiners;
+	public List<String> getAllJoiners(){
+		return this.allJoiners;
 	}
 	
 	//@JsonIgnore
 	public void setAllJoiners(ArrayList<String> joiners){
-		this.minyanJoiners = joiners;
+		//this.minyanJoiners = joiners;
+		this.allJoiners.clear();
+		for(String joiner : joiners){
+			this.allJoiners.add(joiner);
+			
+		}
+		
 	}
 	
+	@JsonIgnore
 	public boolean IsJoinerSigned(String joiner){
-	    	return (this.minyanJoiners.contains(joiner));
+	    	return (this.allJoiners.contains(joiner));
+	    }
+	
+	@JsonIgnore  
+	public int getNumberOfPrayers(){
+	    	return this.allJoiners.size();
 	    }
 }
