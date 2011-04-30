@@ -15,6 +15,7 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 	 */
 	private static final long serialVersionUID = 3680632953183211194L;
 	private String address;
+	private String owner;
 	private List<String> allJoiners;
 		
 	
@@ -23,10 +24,25 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 		this.allJoiners = new ArrayList<String>();
 	}
 	
+	public String getOwner() {
+		return owner;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
+	}
+
 	public GeneralPlace(String name, String address , SPGeoPoint spGeoPoint){
 		super(spGeoPoint,name);
 		this.address = address;
 		this.allJoiners = new ArrayList<String>();
+	}
+	
+	public GeneralPlace(GeneralUser owner, String name, String address , SPGeoPoint spGeoPoint){
+		super(spGeoPoint,name);
+		this.address = address;
+		this.allJoiners = new ArrayList<String>();
+		this.owner = owner.getName();
 	}
 
 	public String getAddress() {

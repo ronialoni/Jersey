@@ -1,4 +1,6 @@
 package il.ac.tau.team3.datastore;
+import javax.jdo.annotations.Embedded;
+import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -7,16 +9,24 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.OneToMany;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import java.util.List;
 
 import il.ac.tau.team3.common.GeneralPlace;
+import il.ac.tau.team3.common.GeneralUser;
 
 @Entity 
 @Inheritance
 public class PlaceLocation extends GeneralLocation {
-		
+	
+	
 	private String name;
+
 	private String address;
+	
+	private String owner;
+
 	private List<String> minyanJoiners;
 	
 	public PlaceLocation(GeneralPlace place ) {
@@ -24,8 +34,16 @@ public class PlaceLocation extends GeneralLocation {
 		this.name = place.getName();
 		this.address = place.getAddress();
 		this.minyanJoiners = place.getAllJoiners();
-		
+		this.owner = place.getOwner();
 		// TODO Auto-generated constructor stub
+	}
+
+	public String getOwner() {
+		return owner;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
 	}
 
 	public String getName() {
@@ -61,4 +79,14 @@ public class PlaceLocation extends GeneralLocation {
 	public void setAllJoiners(List<String> joiners){
 		this.minyanJoiners = joiners;
 	}
+	
+	
+	public boolean IsJoinerSigned(String joiner){
+	    	return (this.minyanJoiners.contains(joiner));
+	    }
+	
+	
+	public int getNumberOfPrayers(){
+	    	return this.minyanJoiners.size();
+	    }
 }

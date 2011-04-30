@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import il.ac.tau.team3.common.GeneralPlace;
 import il.ac.tau.team3.common.GeneralUser;
+import il.ac.tau.team3.common.PlaceAndUser;
 import il.ac.tau.team3.common.SPGeoPoint;
 import il.ac.tau.team3.datastore.EMF;
 import il.ac.tau.team3.datastore.PlaceLocation;
@@ -27,6 +28,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 
 import com.beoui.geocell.GeocellManager;
 import com.beoui.geocell.model.GeocellQuery;
@@ -126,19 +128,63 @@ public class prayerjersy {
 	@POST
 	@Path("/addjoiner")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response UpdatePlaceJoinersByName(GeneralPlace place){
+	public void UpdatePlaceJoinersByName_Add(PlaceAndUser pau){
+		GeneralUser user = pau.getUser();
+		GeneralPlace place = pau.getPlace();
 		
 		//Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE x.id='"+place.getId()+"'");
-		 
+		if(place == null || user == null){
+			//return Response.status(Response.Status.BAD_REQUEST).build();
+			return;
+		}
+		
+		//PlaceLocation placex = (PlaceLocation)q.getResultList().get(0);
+		PlaceLocation placex = entity.find(PlaceLocation.class, place.getId());
+		
+		if(placex!=null){
+			//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
+
+			if(!placex.IsJoinerSigned(user.getName())){
+				entity.getTransaction().begin();
+				placex.addJoiner(user.getName());
+				entity.getTransaction().commit();
+				return;
+				//return Response.created(u).status(Response.Status.ACCEPTED).build();
+			}
+			
+			
+		}
+		//return Response.status(Response.Status.NOT_MODIFIED).build();
+		
+	}
+	
+	@POST
+	@Path("/removejoiner")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void UpdatePlaceJoinersByName_Remove(PlaceAndUser pau){
+		GeneralUser user = pau.getUser();
+		GeneralPlace place = pau.getPlace();
+		//Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE x.id='"+place.getId()+"'");
+		if(place == null || user == null){
+			//return Response.status(Response.Status.BAD_REQUEST).build();
+			return;
+		}
 		
 		//PlaceLocation placex = (PlaceLocation)q.getResultList().get(0);
 		PlaceLocation placex = entity.find(PlaceLocation.class, place.getId());
 		if(placex!=null){
-			entity.getTransaction().begin();
-			placex.setAllJoiners(place.getAllJoiners());
-			entity.getTransaction().commit();
+			//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
+			if(placex.IsJoinerSigned(user.getName())){
+				entity.getTransaction().begin();
+				placex.removeJoiner(user.getName());
+				entity.getTransaction().commit();
+				//return Response.created(u).status(Response.Status.ACCEPTED).build();
+				return;
+			}
+			
+			
 		}
-		return Response.status(Response.Status.ACCEPTED).build();
+		//return Response.status(Response.Status.NOT_MODIFIED).build();
 		
 	}
 	
@@ -238,18 +284,23 @@ public class prayerjersy {
 		return false;
 	}
 	
-	@GET
+	@POST
 	@Path("/deleteplace")
-	@Produces(MediaType.APPLICATION_JSON)
-	public boolean removePlace(@QueryParam("id") long id) {
-		entity.getTransaction().begin();
-		PlaceLocation placex = entity.find(PlaceLocation.class, id);
-		if(placex!=null){
-		entity.remove(placex); 
-		entity.getTransaction().commit();
-		return true;
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void removePlace(GeneralPlace place) {
+		if(place == null || place.getId()==null){
+			return;
 		}
-		return false;
+		
+		
+		PlaceLocation placex = entity.find(PlaceLocation.class, place.getId());
+		if(placex!=null){
+			entity.getTransaction().begin();
+			entity.remove(placex); 
+			entity.getTransaction().commit();
+			return;
+		}
+		
 	}
 	
 	private List<UserLocation> requestDatastoreForUsers(double longitude,double latitude,long radius){
@@ -283,6 +334,7 @@ public class prayerjersy {
 			GeneralPlace tmp = new GeneralPlace(serverPlace.getName(),serverPlace.getAddress(),new SPGeoPoint((int)(serverPlace.getLatitude()*1000000), (int)(serverPlace.getLongitude()*1000000)));
 			tmp.setId(serverPlace.getKey());
 			tmp.setAllJoiners(new ArrayList<String>(serverPlace.getAllJoiners()));
+			tmp.setOwner(serverPlace.getOwner());
 			returnList.add(tmp);
 			
 		}
