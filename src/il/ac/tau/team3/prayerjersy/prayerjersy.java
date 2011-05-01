@@ -27,13 +27,10 @@ import javax.ws.rs.Path;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 
 import com.beoui.geocell.GeocellManager;
 import com.beoui.geocell.model.GeocellQuery;
 import com.beoui.geocell.model.Point;
-import com.google.appengine.api.users.UserService;
 
 //The Java class will be hosted at the URI path "/helloworld"
 
@@ -44,9 +41,11 @@ public class prayerjersy {
 			.getName());
 	private static final int DEFAULT_SEARCH_RESOlUTION = 1;
 	private EntityManager entity;
+	
 
 	public prayerjersy() {
 		entity = EMF.get().createEntityManager();
+		
 	}
 
 	/*@GET
@@ -66,10 +65,12 @@ public class prayerjersy {
 		entity.getTransaction().begin();
 		UserLocation userx = entity.find(UserLocation.class, id);
 		if(userx!=null){
+			
 			userx.setLatitude(latitude);
 			userx.setLongitude(longitude);
 			userx.setGeoCellsData(latitude, longitude);
 			entity.getTransaction().commit();
+			CacheCls.getUserCache().evict();
 			return true;
 		}
 		return false;
@@ -83,9 +84,11 @@ public class prayerjersy {
 	public Long UpdateUserLocationByName(GeneralUser user){
 		
 		Query q = entity.createQuery("SELECT x FROM UserLocation x WHERE x.name='"+user.getName()+"'");
-		 
+		CacheCls.getUserCache().evict(); 
+		CacheCls.getPlaceCache().evict();
 		List<UserLocation> list = q.getResultList();
 		if(list.isEmpty()){
+			
 			return this.createUserInDS(user.getSpGeoPoint().getLongitudeInDegrees(), user.getSpGeoPoint().getLatitudeInDegrees(), user.getName(), user.getStatus());
 			// return Response.status(Response.Status.ACCEPTED).build();
 			 
@@ -110,7 +113,7 @@ public class prayerjersy {
 		
 		//Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE " +
 		//		"x.latitude="+place.getSpGeoPoint().getLatitudeInDegrees()+" AND x.longitude="+place.getSpGeoPoint().getLongitudeInDegrees());
-		 
+		CacheCls.getPlaceCache().evict();
 		
 		//if(q.getResultList().size() == 0){
 			return createPlaceInDS(place);
@@ -143,7 +146,7 @@ public class prayerjersy {
 		
 		if(placex!=null){
 			//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
-
+			CacheCls.getPlaceCache().evict();
 			if(!placex.IsJoinerSigned(user.getName())){
 				entity.getTransaction().begin();
 				placex.addJoiner(user.getName());
@@ -173,6 +176,7 @@ public class prayerjersy {
 		//PlaceLocation placex = (PlaceLocation)q.getResultList().get(0);
 		PlaceLocation placex = entity.find(PlaceLocation.class, place.getId());
 		if(placex!=null){
+			CacheCls.getPlaceCache().evict();
 			//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
 			if(placex.IsJoinerSigned(user.getName())){
 				entity.getTransaction().begin();
@@ -193,20 +197,36 @@ public class prayerjersy {
 	@Path("/users")
 	@Produces(MediaType.APPLICATION_JSON)
 	public GeneralUser[] retrieveAllUsers(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("radius")long radius) {
-		return convertServerUserObjToClientUserObj(requestDatastoreForUsers(longitude, latitude, radius)).toArray(new GeneralUser[0]);
+		ServerQuery query  = new ServerQuery(latitude, longitude, radius, ServerQuery.DataType.USERS);
+		if (CacheCls.getUserCache().containsKey(query))	{
+			return (GeneralUser[])CacheCls.getUserCache().get(query);
+		} else	{
+			GeneralUser[] users =convertServerUserObjToClientUserObj(requestDatastoreForUsers(longitude, latitude, radius)).toArray(new GeneralUser[0]); 
+			CacheCls.getUserCache().put(query, users);
+			return users;
+		}
+		
 	}
 	
 	@GET
 	@Path("/places")
 	@Produces(MediaType.APPLICATION_JSON)
 	public GeneralPlace[] retrieveAllPlaces(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("radius")long radius) {
-		return convertServerPlaceObjToClientPlaceObj(requestDatastoreForPlaces(longitude, latitude, radius)).toArray(new GeneralPlace[0]);
+		ServerQuery query  = new ServerQuery(latitude, longitude, radius, ServerQuery.DataType.PLACES);
+		if (CacheCls.getPlaceCache().containsKey(query))	{
+			return (GeneralPlace[])CacheCls.getPlaceCache().get(query);
+		} else	{
+			GeneralPlace[] places =convertServerPlaceObjToClientPlaceObj(requestDatastoreForPlaces(longitude, latitude, radius)).toArray(new GeneralPlace[0]); 
+			CacheCls.getPlaceCache().put(query, places);
+			return places;
+		}
 	}
 	
 	@GET
 	@Path("/newuser")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Long CreateNewUser(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("name")String name,@QueryParam("status")String status) {
+		CacheCls.getUserCache().evict();
 		return this.createUserInDS(longitude, latitude, name, status);
 	}
 	
@@ -231,6 +251,7 @@ public class prayerjersy {
 		entity.getTransaction().begin();
 		PlaceLocation placex = entity.find(PlaceLocation.class, id);
 		if(placex!=null){
+			CacheCls.getPlaceCache().evict();
 			placex.addJoiner(name);
 			entity.getTransaction().commit();
 			return true;
@@ -259,9 +280,10 @@ public class prayerjersy {
 		entity.getTransaction().begin();
 		UserLocation userx = entity.find(UserLocation.class, id);
 		if(userx!=null){
-		entity.remove(userx); 
-		entity.getTransaction().commit();
-		return true;
+			CacheCls.getUserCache().evict();
+			entity.remove(userx); 
+			entity.getTransaction().commit();
+			return true;
 		}
 		return false;
 	}
@@ -275,6 +297,7 @@ public class prayerjersy {
 
 			entity.find(PlaceLocation.class, id);
 		if(placex!=null){
+			CacheCls.getPlaceCache().evict();
 			placex.addJoiner(joiner);
 
 			entity.getTransaction().commit();
@@ -295,6 +318,7 @@ public class prayerjersy {
 		
 		PlaceLocation placex = entity.find(PlaceLocation.class, place.getId());
 		if(placex!=null){
+			CacheCls.getPlaceCache().evict();
 			entity.getTransaction().begin();
 			entity.remove(placex); 
 			entity.getTransaction().commit();
