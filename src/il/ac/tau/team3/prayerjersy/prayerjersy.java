@@ -167,33 +167,42 @@ public class prayerjersy {
 		if(placex!=null){
 			//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
 			CacheCls.getPlaceCache().clear();
+			boolean flag = false;
+			entity.getTransaction().begin();
 			if(praysWishes[0]){
 				if(!placex.IsJoinerSigned(user.getName())){
-					entity.getTransaction().begin();
+					flag = true;
 					placex.addJoiner(user.getName());
-					entity.getTransaction().commit();
+					
 				}
 			}
 			if(praysWishes[1]){
 				if(!placex.IsJoinerSigned2(user.getName())){
-					entity.getTransaction().begin();
+					flag = true;
 					placex.addJoiner2(user.getName());
-					entity.getTransaction().commit();
+					
 				}
 			}
 			if(praysWishes[2]){
 				if(!placex.IsJoinerSigned3(user.getName())){
-					entity.getTransaction().begin();
+					flag = true;
 					placex.addJoiner3(user.getName());
-					entity.getTransaction().commit();
+					
 				}
+			}
+			
+			if (flag)	{
+				entity.getTransaction().commit();
+			} else	{
+				entity.getTransaction().setRollbackOnly();
+			}
 			}
 				
 				//return Response.created(u).status(Response.Status.ACCEPTED).build();
 			}
 			
 			
-		}
+	
 		//return Response.status(Response.Status.NOT_MODIFIED).build();
 		
 	
@@ -215,31 +224,40 @@ public class prayerjersy {
 		PlaceLocation placex = entity.find(PlaceLocation.class, place.getId());
 		if(placex!=null){
 			CacheCls.getPlaceCache().clear();
+			boolean flag = false;
+			entity.getTransaction().begin();
 			//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
 			if(praysWishes[0]){
 				if(placex.IsJoinerSigned(user.getName())){
-					entity.getTransaction().begin();
+					
 					placex.removeJoiner(user.getName());
-					entity.getTransaction().commit();
+					flag = true;
 				}
 			}
 			if(praysWishes[1]){
 				if(placex.IsJoinerSigned2(user.getName())){
-					entity.getTransaction().begin();
+					
 					placex.removeJoiner2(user.getName());
-					entity.getTransaction().commit();
+					flag = true;
 				}
 			}
 			if(praysWishes[2]){
 				if(placex.IsJoinerSigned3(user.getName())){
-					entity.getTransaction().begin();
+					
 					placex.removeJoiner3(user.getName());
-					entity.getTransaction().commit();
+					flag = true;
 				}
 			}
 			
 			
-		}
+			if (flag){
+				entity.getTransaction().commit();
+			} else 	{
+				entity.getTransaction().setRollbackOnly();
+				}
+			}
+			
+		
 		//return Response.status(Response.Status.NOT_MODIFIED).build();
 		
 	}
