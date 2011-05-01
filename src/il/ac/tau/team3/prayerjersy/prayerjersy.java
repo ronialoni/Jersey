@@ -94,7 +94,7 @@ public class prayerjersy {
 			 
 		}
 		
-		UserLocation userx = (UserLocation)list.get(0);
+		UserLocation userx = list.get(0);
 		entity.getTransaction().begin();
 		userx.setLatitude(user.getSpGeoPoint().getLatitudeInDegrees());
 		userx.setLongitude(user.getSpGeoPoint().getLongitudeInDegrees());
@@ -104,6 +104,21 @@ public class prayerjersy {
 		
 		return userx.getKey();
 		//return Response.status(Response.Status.ACCEPTED).build();
+	}
+	
+	@GET
+	@Path("/getuserbymail")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Long  GetUserByMailAccount(@QueryParam("account") String account){
+		//Query q = entity.createQuery("SELECT x FROM UserLocation x WHERE x.name='"+account+"'");
+		Query q = entity.createQuery("SELECT x FROM UserLocation x WHERE x.name=?1");
+		q.setParameter (1, account);
+		List<UserLocation> list = q.getResultList();
+		if(!list.isEmpty()){
+			return list.get(0).getKey();
+			 
+		}
+		return (long) -1;
 	}
 	
 	@POST
@@ -134,8 +149,13 @@ public class prayerjersy {
 	public void UpdatePlaceJoinersByName_Add(PlaceAndUser pau){
 		GeneralUser user = pau.getUser();
 		GeneralPlace place = pau.getPlace();
+		boolean praysWishes[] = pau.getPraysWishes();
 		
-		//Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE x.id='"+place.getId()+"'");
+//		Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE x.id="+place.getId());
+//		
+//		List<PlaceLocation> list = q.getResultList();
+//		PlaceLocation p = list.get(0);
+		
 		if(place == null || user == null){
 			//return Response.status(Response.Status.BAD_REQUEST).build();
 			return;
@@ -147,11 +167,28 @@ public class prayerjersy {
 		if(placex!=null){
 			//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
 			CacheCls.getPlaceCache().clear();
-			if(!placex.IsJoinerSigned(user.getName())){
-				entity.getTransaction().begin();
-				placex.addJoiner(user.getName());
-				entity.getTransaction().commit();
-				return;
+			if(praysWishes[0]){
+				if(!placex.IsJoinerSigned(user.getName())){
+					entity.getTransaction().begin();
+					placex.addJoiner(user.getName());
+					entity.getTransaction().commit();
+				}
+			}
+			if(praysWishes[1]){
+				if(!placex.IsJoinerSigned2(user.getName())){
+					entity.getTransaction().begin();
+					placex.addJoiner2(user.getName());
+					entity.getTransaction().commit();
+				}
+			}
+			if(praysWishes[2]){
+				if(!placex.IsJoinerSigned3(user.getName())){
+					entity.getTransaction().begin();
+					placex.addJoiner3(user.getName());
+					entity.getTransaction().commit();
+				}
+			}
+				
 				//return Response.created(u).status(Response.Status.ACCEPTED).build();
 			}
 			
@@ -159,7 +196,7 @@ public class prayerjersy {
 		}
 		//return Response.status(Response.Status.NOT_MODIFIED).build();
 		
-	}
+	
 	
 	@POST
 	@Path("/removejoiner")
@@ -167,6 +204,7 @@ public class prayerjersy {
 	public void UpdatePlaceJoinersByName_Remove(PlaceAndUser pau){
 		GeneralUser user = pau.getUser();
 		GeneralPlace place = pau.getPlace();
+		boolean praysWishes[] = pau.getPraysWishes();
 		//Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE x.id='"+place.getId()+"'");
 		if(place == null || user == null){
 			//return Response.status(Response.Status.BAD_REQUEST).build();
@@ -178,12 +216,26 @@ public class prayerjersy {
 		if(placex!=null){
 			CacheCls.getPlaceCache().clear();
 			//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
-			if(placex.IsJoinerSigned(user.getName())){
-				entity.getTransaction().begin();
-				placex.removeJoiner(user.getName());
-				entity.getTransaction().commit();
-				//return Response.created(u).status(Response.Status.ACCEPTED).build();
-				return;
+			if(praysWishes[0]){
+				if(placex.IsJoinerSigned(user.getName())){
+					entity.getTransaction().begin();
+					placex.removeJoiner(user.getName());
+					entity.getTransaction().commit();
+				}
+			}
+			if(praysWishes[1]){
+				if(placex.IsJoinerSigned2(user.getName())){
+					entity.getTransaction().begin();
+					placex.removeJoiner2(user.getName());
+					entity.getTransaction().commit();
+				}
+			}
+			if(praysWishes[2]){
+				if(placex.IsJoinerSigned3(user.getName())){
+					entity.getTransaction().begin();
+					placex.removeJoiner3(user.getName());
+					entity.getTransaction().commit();
+				}
 			}
 			
 			
@@ -214,8 +266,7 @@ public class prayerjersy {
 	public GeneralPlace[] retrieveAllPlaces(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("radius")long radius) {
 		ServerQuery query  = new ServerQuery(latitude, longitude, radius, ServerQuery.DataType.PLACES);
 		if (CacheCls.getPlaceCache().containsKey(query))	{
-			GeneralPlace[] places = (GeneralPlace[])CacheCls.getPlaceCache().get(query); 
-			return places;
+			return (GeneralPlace[])CacheCls.getPlaceCache().get(query);
 		} else	{
 			GeneralPlace[] places =convertServerPlaceObjToClientPlaceObj(requestDatastoreForPlaces(longitude, latitude, radius)).toArray(new GeneralPlace[0]); 
 			CacheCls.getPlaceCache().put(query, places);
@@ -359,6 +410,9 @@ public class prayerjersy {
 			GeneralPlace tmp = new GeneralPlace(serverPlace.getName(),serverPlace.getAddress(),new SPGeoPoint((int)(serverPlace.getLatitude()*1000000), (int)(serverPlace.getLongitude()*1000000)));
 			tmp.setId(serverPlace.getKey());
 			tmp.setAllJoiners(new ArrayList<String>(serverPlace.getAllJoiners()));
+			tmp.setAllJoiners2(new ArrayList<String>(serverPlace.getAllJoiners2()));
+			tmp.setAllJoiners3(new ArrayList<String>(serverPlace.getAllJoiners3()));
+			tmp.setPrays(serverPlace.getPrays());
 			tmp.setOwner(serverPlace.getOwner());
 			returnList.add(tmp);
 			
