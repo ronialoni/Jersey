@@ -70,7 +70,7 @@ public class prayerjersy {
 			userx.setLongitude(longitude);
 			userx.setGeoCellsData(latitude, longitude);
 			entity.getTransaction().commit();
-			CacheCls.getUserCache().evict();
+			CacheCls.getUserCache().clear();
 			return true;
 		}
 		return false;
@@ -84,8 +84,8 @@ public class prayerjersy {
 	public Long UpdateUserLocationByName(GeneralUser user){
 		
 		Query q = entity.createQuery("SELECT x FROM UserLocation x WHERE x.name='"+user.getName()+"'");
-		CacheCls.getUserCache().evict(); 
-		CacheCls.getPlaceCache().evict();
+		CacheCls.getUserCache().clear(); 
+		CacheCls.getPlaceCache().clear();
 		List<UserLocation> list = q.getResultList();
 		if(list.isEmpty()){
 			
@@ -113,7 +113,7 @@ public class prayerjersy {
 		
 		//Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE " +
 		//		"x.latitude="+place.getSpGeoPoint().getLatitudeInDegrees()+" AND x.longitude="+place.getSpGeoPoint().getLongitudeInDegrees());
-		CacheCls.getPlaceCache().evict();
+		CacheCls.getPlaceCache().clear();
 		
 		//if(q.getResultList().size() == 0){
 			return createPlaceInDS(place);
@@ -146,7 +146,7 @@ public class prayerjersy {
 		
 		if(placex!=null){
 			//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
-			CacheCls.getPlaceCache().evict();
+			CacheCls.getPlaceCache().clear();
 			if(!placex.IsJoinerSigned(user.getName())){
 				entity.getTransaction().begin();
 				placex.addJoiner(user.getName());
@@ -176,7 +176,7 @@ public class prayerjersy {
 		//PlaceLocation placex = (PlaceLocation)q.getResultList().get(0);
 		PlaceLocation placex = entity.find(PlaceLocation.class, place.getId());
 		if(placex!=null){
-			CacheCls.getPlaceCache().evict();
+			CacheCls.getPlaceCache().clear();
 			//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
 			if(placex.IsJoinerSigned(user.getName())){
 				entity.getTransaction().begin();
@@ -214,7 +214,8 @@ public class prayerjersy {
 	public GeneralPlace[] retrieveAllPlaces(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("radius")long radius) {
 		ServerQuery query  = new ServerQuery(latitude, longitude, radius, ServerQuery.DataType.PLACES);
 		if (CacheCls.getPlaceCache().containsKey(query))	{
-			return (GeneralPlace[])CacheCls.getPlaceCache().get(query);
+			GeneralPlace[] places = (GeneralPlace[])CacheCls.getPlaceCache().get(query); 
+			return places;
 		} else	{
 			GeneralPlace[] places =convertServerPlaceObjToClientPlaceObj(requestDatastoreForPlaces(longitude, latitude, radius)).toArray(new GeneralPlace[0]); 
 			CacheCls.getPlaceCache().put(query, places);
@@ -226,7 +227,7 @@ public class prayerjersy {
 	@Path("/newuser")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Long CreateNewUser(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("name")String name,@QueryParam("status")String status) {
-		CacheCls.getUserCache().evict();
+		CacheCls.getUserCache().clear();
 		return this.createUserInDS(longitude, latitude, name, status);
 	}
 	
@@ -251,7 +252,7 @@ public class prayerjersy {
 		entity.getTransaction().begin();
 		PlaceLocation placex = entity.find(PlaceLocation.class, id);
 		if(placex!=null){
-			CacheCls.getPlaceCache().evict();
+			CacheCls.getPlaceCache().clear();
 			placex.addJoiner(name);
 			entity.getTransaction().commit();
 			return true;
@@ -280,7 +281,7 @@ public class prayerjersy {
 		entity.getTransaction().begin();
 		UserLocation userx = entity.find(UserLocation.class, id);
 		if(userx!=null){
-			CacheCls.getUserCache().evict();
+			CacheCls.getUserCache().clear();
 			entity.remove(userx); 
 			entity.getTransaction().commit();
 			return true;
@@ -297,7 +298,7 @@ public class prayerjersy {
 
 			entity.find(PlaceLocation.class, id);
 		if(placex!=null){
-			CacheCls.getPlaceCache().evict();
+			CacheCls.getPlaceCache().clear();
 			placex.addJoiner(joiner);
 
 			entity.getTransaction().commit();
@@ -318,7 +319,7 @@ public class prayerjersy {
 		
 		PlaceLocation placex = entity.find(PlaceLocation.class, place.getId());
 		if(placex!=null){
-			CacheCls.getPlaceCache().evict();
+			CacheCls.getPlaceCache().clear();
 			entity.getTransaction().begin();
 			entity.remove(placex); 
 			entity.getTransaction().commit();
