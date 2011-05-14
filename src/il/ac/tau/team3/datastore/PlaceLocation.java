@@ -24,8 +24,8 @@ public class PlaceLocation extends GeneralLocation {
 	private String name;
 	@Persistent
 	private String address;
-	@Persistent
-	private String owner;
+	@Persistent (defaultFetchGroup="true",serialized="true")
+	private GeneralUser owner;
 	@Persistent
 	private Date startDate;
 	@Persistent
@@ -91,12 +91,11 @@ public class PlaceLocation extends GeneralLocation {
 	}
 
 
-
-	public String getOwner() {
+	public GeneralUser getOwner() {
 		return owner;
 	}
 
-	public void setOwner(String owner) {
+	public void setOwner(GeneralUser owner) {
 		this.owner = owner;
 	}
 

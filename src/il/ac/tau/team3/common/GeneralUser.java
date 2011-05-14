@@ -3,17 +3,22 @@ package il.ac.tau.team3.common;
 
 import java.io.Serializable;
 
+import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
+
 import org.codehaus.jackson.annotate.JsonIgnore;
 
-
+@PersistenceCapable
 public class GeneralUser extends GeneralLocation implements Serializable {
 		/**
 	 * 
 	 */
 	private static final long serialVersionUID = -8100017600787664519L;
-		
+		@Persistent
 		private String status;
+		@Persistent
 		private String firstName;
+		@Persistent
 		private String lastName;
 		
 		public GeneralUser()	{
