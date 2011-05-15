@@ -183,20 +183,20 @@ public class prayerjersy {
 				//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
 				CacheCls.getPlaceCache().clear();
 				if(praysWishes[0]){
-					if(!placex.getPraysOfTheDay().get(0).isJoinerSigned(user.getName())){
-						placex.getPraysOfTheDay().get(0).addJoiner(user.getName());
+					if(!placex.getPraysOfTheDay().get(0).isJoinerSigned(user)){
+						placex.getPraysOfTheDay().get(0).addJoiner(user);
 						JDOHelper.makeDirty(placex, "praysOfTheDay");
 					}
 				}
 				if(praysWishes[1]){
-					if(!placex.getPraysOfTheDay().get(1).isJoinerSigned(user.getName())){
-						placex.getPraysOfTheDay().get(1).addJoiner(user.getName());
+					if(!placex.getPraysOfTheDay().get(1).isJoinerSigned(user)){
+						placex.getPraysOfTheDay().get(1).addJoiner(user);
 						JDOHelper.makeDirty(placex, "praysOfTheDay");
 					}
 				}
 				if(praysWishes[2]){
-					if(!placex.getPraysOfTheDay().get(2).isJoinerSigned(user.getName())){
-						placex.getPraysOfTheDay().get(2).addJoiner(user.getName());
+					if(!placex.getPraysOfTheDay().get(2).isJoinerSigned(user)){
+						placex.getPraysOfTheDay().get(2).addJoiner(user);
 						JDOHelper.makeDirty(placex, "praysOfTheDay");
 					}
 				}
@@ -224,28 +224,22 @@ public class prayerjersy {
 				CacheCls.getPlaceCache().clear();
 
 				if(praysWishes[0]){
-					if(placex.getPraysOfTheDay().get(0).isJoinerSigned(user.getName())){
-						placex.getPraysOfTheDay().get(0).removeJoiner(user.getName());
+					if(placex.getPraysOfTheDay().get(0).isJoinerSigned(user)){
+						placex.getPraysOfTheDay().get(0).removeJoiner(user);
 						JDOHelper.makeDirty(placex, "praysOfTheDay");
 					}
 				}
 				if(praysWishes[1]){
-					if(placex.getPraysOfTheDay().get(1).isJoinerSigned(user.getName())){
-						placex.getPraysOfTheDay().get(1).removeJoiner(user.getName());
+					if(placex.getPraysOfTheDay().get(1).isJoinerSigned(user)){
+						placex.getPraysOfTheDay().get(1).removeJoiner(user);
 						JDOHelper.makeDirty(placex, "praysOfTheDay");
 					}
 				}
 				if(praysWishes[2]){
-					if(placex.getPraysOfTheDay().get(2).isJoinerSigned(user.getName())){
-						//Transaction tx = pm.currentTransaction();
-						//tx.begin();
-						placex.getPraysOfTheDay().get(2).removeJoiner(user.getName());
-						//placex.setPraysOfTheDay(new ArrayList<Pray>(placex.getPraysOfTheDay()));
+					if(placex.getPraysOfTheDay().get(2).isJoinerSigned(user)){
+						placex.getPraysOfTheDay().get(2).removeJoiner(user);
 						JDOHelper.makeDirty(placex, "praysOfTheDay");
-						//placex.setPraysOfTheDay(null);
-						//pm.makePersistent(placex);
-						//tx.commit();
-						
+											
 					}
 				}
 

@@ -115,14 +115,14 @@ public class PlaceLocation extends GeneralLocation {
 		this.address = address;
 	}
 	
-	public void addJoiner(int prayNumber, String name){
+	public void addJoiner(int prayNumber, GeneralUser name){
 		if(prayNumber < 0 || prayNumber >= praysOfTheDay.size()){
 			return ;
 		}
 		this.praysOfTheDay.get(prayNumber).addJoiner(name);
 	}
 	
-	public void removeJoiner(int prayNumber, String name){
+	public void removeJoiner(int prayNumber, GeneralUser name){
 		if(prayNumber < 0 || prayNumber >= praysOfTheDay.size()){
 			return ;
 		}
@@ -132,7 +132,7 @@ public class PlaceLocation extends GeneralLocation {
 
 	
 	
-	public boolean IsJoinerSigned(int prayNum, String joiner){
+	public boolean IsJoinerSigned(int prayNum, GeneralUser joiner){
 	    	return (this.praysOfTheDay.get(prayNum).isJoinerSigned(joiner));
 	    }
 	
