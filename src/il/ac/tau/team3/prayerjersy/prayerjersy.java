@@ -53,7 +53,6 @@ public class prayerjersy {
 
 
 	public prayerjersy() {
-		//entity = EMF.get().createEntityManager();
 		this.pm = PMF.get().getPersistenceManager();
 	}
 
@@ -148,21 +147,10 @@ public class prayerjersy {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Long UpdatePlaceLocationByLocation(GeneralPlace place){
 
-		//Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE " +
-		//		"x.latitude="+place.getSpGeoPoint().getLatitudeInDegrees()+" AND x.longitude="+place.getSpGeoPoint().getLongitudeInDegrees());
+	
 		CacheCls.getPlaceCache().clear();
-
-		//if(q.getResultList().size() == 0){
 		return createPlaceInDS(place);
-		//return Response.status(Response.Status.ACCEPTED).build();
-		//}
-
-		// register changed place in DS
-		/*entity.getTransaction().begin();
-
-		entity.getTransaction().commit();*/
-
-		//return Response.status(Response.Status.ACCEPTED).build();
+	
 	}
 
 	@POST
@@ -279,7 +267,28 @@ public class prayerjersy {
 			return places;
 		}
 	}
-
+	
+	@GET
+	@Path("/placesbyowner")
+	@Produces(MediaType.APPLICATION_JSON)
+	public GeneralPlace[] retrieveAllOwnerPlaces(@QueryParam("owner") String owner) {
+		Query q = pm.newQuery(PlaceLocation.class);
+		Collection<PlaceLocation> list = (Collection<PlaceLocation>) q.execute();
+		List<GeneralPlace> tmp =  new ArrayList<GeneralPlace>();
+		for ( PlaceLocation placex : list){
+			if(placex.getOwner().getName().equals(owner)){
+				tmp.add(new GeneralPlace(placex));
+			}
+		}
+		GeneralPlace[] returnVal = new GeneralPlace[tmp.size()];
+		if(null != tmp){
+		for(int i = 0 ; i < tmp.size(); ++i){
+			returnVal[i] = tmp.get(i);
+		}
+		}
+		return returnVal;
+		
+	}
 	/*
 	@GET
 	@Path("/newuser")
