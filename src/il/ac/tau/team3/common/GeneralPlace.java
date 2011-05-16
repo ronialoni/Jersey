@@ -1,6 +1,7 @@
 package il.ac.tau.team3.common;
 
 import il.ac.tau.team3.datastore.PlaceLocation;
+import il.ac.tau.team3.datastore.UserLocation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 		this.startDate = new Date();
 		this.endDate = new Date();
 	}
+	
 
 	public GeneralPlace(GeneralUser owner, String name, String address , SPGeoPoint spGeoPoint, Date startDate,Date endDate){
 		super(spGeoPoint,name);
@@ -58,8 +60,9 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 		this.endDate = endDate;
 	}
 	public GeneralPlace(PlaceLocation serverPlace){
-		this(serverPlace.getOwner(),serverPlace.getName(),serverPlace.getAddress(),
-				new SPGeoPoint((int)(serverPlace.getLatitude()*1000000), (int)(serverPlace.getLongitude()*1000000)),serverPlace.getStartDate(),  serverPlace.getEndDate());
+		this(new GeneralUser(serverPlace.getOwnerObj()),serverPlace.getName(),serverPlace.getAddress(),
+				new SPGeoPoint((int)(serverPlace.getLatitude()*1000000), 
+						(int)(serverPlace.getLongitude()*1000000)),serverPlace.getStartDate(),  serverPlace.getEndDate());
 		this.prays = serverPlace.getPrays();
 		if(null != serverPlace.getPraysOfTheDay()){
 			for(int i = 0 ; i < 3 ; ++i){

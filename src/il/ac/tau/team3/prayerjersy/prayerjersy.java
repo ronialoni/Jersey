@@ -35,6 +35,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.jsp.ah.entityDetailsBody_jsp;
+import org.mortbay.log.Log;
+
 import com.beoui.geocell.GeocellManager;
 import com.beoui.geocell.GeocellQueryEngine;
 import com.beoui.geocell.JDOGeocellQueryEngine;
@@ -53,6 +56,7 @@ public class prayerjersy {
 
 
 	public prayerjersy() {
+		//entity = EMF.get().createEntityManager();
 		this.pm = PMF.get().getPersistenceManager();
 	}
 
@@ -93,13 +97,14 @@ public class prayerjersy {
 	@Path("/updateuserbyname")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Long UpdateUserLocationByName(GeneralUser user){
-		Query q = pm.newQuery(UserLocation.class, "this.name='"+user.getName()+"'");
+		Query q = pm.newQuery(UserLocation.class, "name==nameParam");
+		q.declareParameters("String nameParam");
 		CacheCls.getUserCache().clear(); 
 		CacheCls.getPlaceCache().clear();
 		Long id;
 		try{
 			
-			Collection<UserLocation> list = (Collection<UserLocation>) q.execute();
+			Collection<UserLocation> list = (Collection<UserLocation>) q.execute(user.getName());
 			if(list.isEmpty()){
 
 				return this.createUserInDS(user.getSpGeoPoint().getLongitudeInDegrees(), user.getSpGeoPoint().getLatitudeInDegrees(), user.getName(), user.getStatus() , user.getFirstName(),user.getLastName());
@@ -147,10 +152,21 @@ public class prayerjersy {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Long UpdatePlaceLocationByLocation(GeneralPlace place){
 
-	
+		//Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE " +
+		//		"x.latitude="+place.getSpGeoPoint().getLatitudeInDegrees()+" AND x.longitude="+place.getSpGeoPoint().getLongitudeInDegrees());
 		CacheCls.getPlaceCache().clear();
+
+		//if(q.getResultList().size() == 0){
 		return createPlaceInDS(place);
-	
+		//return Response.status(Response.Status.ACCEPTED).build();
+		//}
+
+		// register changed place in DS
+		/*entity.getTransaction().begin();
+
+		entity.getTransaction().commit();*/
+
+		//return Response.status(Response.Status.ACCEPTED).build();
 	}
 
 	@POST
@@ -225,9 +241,15 @@ public class prayerjersy {
 				}
 				if(praysWishes[2]){
 					if(placex.getPraysOfTheDay().get(2).isJoinerSigned(user)){
+						//Transaction tx = pm.currentTransaction();
+						//tx.begin();
 						placex.getPraysOfTheDay().get(2).removeJoiner(user);
+						//placex.setPraysOfTheDay(new ArrayList<Pray>(placex.getPraysOfTheDay()));
 						JDOHelper.makeDirty(placex, "praysOfTheDay");
-											
+						//placex.setPraysOfTheDay(null);
+						//pm.makePersistent(placex);
+						//tx.commit();
+						
 					}
 				}
 
@@ -272,21 +294,8 @@ public class prayerjersy {
 	@Path("/placesbyowner")
 	@Produces(MediaType.APPLICATION_JSON)
 	public GeneralPlace[] retrieveAllOwnerPlaces(@QueryParam("owner") String owner) {
-		Query q = pm.newQuery(PlaceLocation.class);
-		Collection<PlaceLocation> list = (Collection<PlaceLocation>) q.execute();
-		List<GeneralPlace> tmp =  new ArrayList<GeneralPlace>();
-		for ( PlaceLocation placex : list){
-			if(placex.getOwner().getName().equals(owner)){
-				tmp.add(new GeneralPlace(placex));
-			}
-		}
-		GeneralPlace[] returnVal = new GeneralPlace[tmp.size()];
-		if(null != tmp){
-		for(int i = 0 ; i < tmp.size(); ++i){
-			returnVal[i] = tmp.get(i);
-		}
-		}
-		return returnVal;
+		/* REWRITE */
+		return null;
 		
 	}
 	/*
@@ -415,8 +424,12 @@ public class prayerjersy {
 				tmp.setId(serverPlace.getKey());
 			
 				tmp.setPraysOfTheDay((Pray[])serverPlace.getPraysOfTheDay().toArray(new Pray[0]));
-				tmp.setPrays(serverPlace.getPrays());
-				tmp.setOwner(serverPlace.getOwner());
+				/*for (Pray p : serverPlace.getPraysOfTheDay())	{
+					for (String s : p.getJoiners())	{
+						//Log.warn(s);
+					}
+				}*/
+				tmp.setOwner(new GeneralUser(serverPlace.getOwnerObj()));
 				returnList.add(tmp);
 
 			}

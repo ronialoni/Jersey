@@ -1,6 +1,8 @@
 
 package il.ac.tau.team3.common;
 
+import il.ac.tau.team3.datastore.UserLocation;
+
 import java.io.Serializable;
 
 import javax.jdo.annotations.PersistenceCapable;
@@ -29,6 +31,13 @@ public class GeneralUser extends GeneralLocation implements Serializable {
 			super(spGeoPoint,name);
 			
 			this.status = status;
+		}
+		
+		public GeneralUser(UserLocation serverObj) {
+			this(serverObj.getName(), new SPGeoPoint((int)(serverObj.getLatitude()*1000000), 
+						(int)(serverObj.getLongitude()*1000000)), serverObj.getStatus(), serverObj.getFirstName(), serverObj.getLastName());
+			
+
 		}
 		
 		public GeneralUser(String name, SPGeoPoint spGeoPoint, String status, String firstName, String lastName) {
@@ -71,7 +80,30 @@ public class GeneralUser extends GeneralLocation implements Serializable {
 		}
 		
 		
-
+		@JsonIgnore
+		@Override
+		public boolean equals(Object o)	{
+			if (o == this) {
+				return true;
+			}
+			
+			if (o == null)	{
+				return false;
+			}
+			
+			if (!(o instanceof GeneralUser))	{
+				return false;
+			}
+			
+			GeneralUser other = (GeneralUser)o;
+			
+			if ((null != getId()) && (null != other.getId()))	{
+				return this.getId().equals(other.getId());
+			}
+			
+			return this.getName().equals(other.getName());
+			
+		}
 		
 		
 }

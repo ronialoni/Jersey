@@ -1,5 +1,7 @@
 package il.ac.tau.team3.datastore;
 
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.jdo.annotations.Element;
 import javax.jdo.annotations.Embedded;
 import javax.jdo.annotations.PersistenceCapable;
@@ -24,16 +26,17 @@ public class PlaceLocation extends GeneralLocation {
 	private String name;
 	@Persistent
 	private String address;
-	@Persistent (defaultFetchGroup="true",serialized="true")
-	private GeneralUser owner;
+	@Persistent
+	private long owner;
 	@Persistent
 	private Date startDate;
 	@Persistent
 	private Date endDate;
 	
 	
-	@Persistent (defaultFetchGroup="true",serialized="true", dependentElement = "true")
-	private List<Pray> praysOfTheDay = new ArrayList<Pray>();
+	@Persistent(/*mappedBy = "place"*/)
+    @Element(dependent = "true")
+	private List<Pray> praysOfTheDay;// = new ArrayList<Pray>();
 	
 	
 	@Persistent
@@ -46,11 +49,18 @@ public class PlaceLocation extends GeneralLocation {
 		this.name = place.getName();
 		this.address = place.getAddress();
 		this.prays = place.getPrays();
-		this.owner = place.getOwner();
+		
+		UserLocation owner = UserLocation.getUserByName(place.getOwner().getName());
+		this.owner = owner.getKey();
 		this.startDate = place.getStartDate();
 		this.endDate = place.getEndDate();
+		this.praysOfTheDay = new ArrayList<Pray>(place.getPrays().length);
 		for(Pray pray : place.getPraysOfTheDay()){
-			this.praysOfTheDay.add(pray);
+			if (pray != null)	{
+				this.praysOfTheDay.add(new Pray(pray));
+			} else	{
+				this.praysOfTheDay.add(null);
+			}
 		}
 		
 		// TODO Auto-generated constructor stub
@@ -91,11 +101,16 @@ public class PlaceLocation extends GeneralLocation {
 	}
 
 
-	public GeneralUser getOwner() {
+	public long getOwner() {
 		return owner;
 	}
+	
+	@JsonIgnore
+	public UserLocation getOwnerObj()	{
+		return PMF.get().getPersistenceManager().getObjectById(UserLocation.class, getOwner());
+	}
 
-	public void setOwner(GeneralUser owner) {
+	public void setOwner(long owner) {
 		this.owner = owner;
 	}
 
@@ -115,11 +130,11 @@ public class PlaceLocation extends GeneralLocation {
 		this.address = address;
 	}
 	
-	public void addJoiner(int prayNumber, GeneralUser name){
+	public void addJoiner(int prayNumber, GeneralUser user){
 		if(prayNumber < 0 || prayNumber >= praysOfTheDay.size()){
 			return ;
 		}
-		this.praysOfTheDay.get(prayNumber).addJoiner(name);
+		this.praysOfTheDay.get(prayNumber).addJoiner(user);
 	}
 	
 	public void removeJoiner(int prayNumber, GeneralUser name){
