@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import il.ac.tau.team3.common.GeneralPlace;
 import il.ac.tau.team3.common.GeneralUser;
 import il.ac.tau.team3.common.PlaceAndUser;
+import il.ac.tau.team3.common.Pray;
 import il.ac.tau.team3.datastore.PMF;
 
 
@@ -153,6 +154,7 @@ public class prayerjersy {
 		GeneralUser user = pau.getUser();
 		GeneralPlace place = pau.getPlace();
 		boolean praysWishes[] = pau.getPraysWishes();
+		final String[] praysNames = new String[]{"Shaharit", "Minha", "Arvit"};
 
 		if(place == null || user == null || place.getId() == null || user.getId() == null){
 			return;
@@ -163,17 +165,13 @@ public class prayerjersy {
 			if(placex!=null){
 				//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
 				CacheCls.getPlaceCache().clear();
-				boolean flag = false;
 				for (int i = 0; i < praysWishes.length; i++)	{
 					if(praysWishes[i]){
-						if(!placex.getPraysOfTheDay().get(i).isJoinerSigned(user)){
-							placex.getPraysOfTheDay().get(i).addJoiner(user);
-							flag = true;
+						Pray p = placex.getPrayByName(praysNames[i]); 
+						if(!p.isJoinerSigned(user)){
+							p.addJoiner(user);
 						}
 					}
-				}
-				if (flag)	{
-					JDOHelper.makeDirty(placex, "praysOfTheDay");
 				}
 			}
 		}finally{
@@ -189,6 +187,7 @@ public class prayerjersy {
 		GeneralUser user = pau.getUser();
 		GeneralPlace place = pau.getPlace();
 		boolean praysWishes[] = pau.getPraysWishes();
+		final String[] praysNames = new String[]{"Shaharit", "Minha", "Arvit"};
 		if(place == null || user == null || place.getId() == null || user.getId() == null){
 			return;
 		}
@@ -198,17 +197,13 @@ public class prayerjersy {
 			if(placex!=null){
 				//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
 				CacheCls.getPlaceCache().clear();
-				boolean flag = false;
 				for (int i = 0; i < praysWishes.length; i++)	{
 					if(praysWishes[i]){
-						if(placex.getPraysOfTheDay().get(i).isJoinerSigned(user)){
-							placex.getPraysOfTheDay().get(i).removeJoiner(user);
-							flag = true;
+						Pray p = placex.getPrayByName(praysNames[i]); 
+						if(p.isJoinerSigned(user)){
+							p.removeJoiner(user);
 						}
 					}
-				}
-				if (flag)	{
-					JDOHelper.makeDirty(placex, "praysOfTheDay");
 				}
 			}
 		}finally{
