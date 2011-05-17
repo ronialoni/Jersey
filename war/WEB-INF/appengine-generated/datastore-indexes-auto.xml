@@ -1,4 +1,10 @@
-<!-- Indices written at Sat, 30 Apr 2011 14:25:38 UTC -->
+<!-- Indices written at Tue, 17 May 2011 16:02:02 UTC -->
 
-<datastore-indexes/>
+<datastore-indexes>
 
+    <!-- Used 28 times in query history -->
+    <datastore-index kind="Pray" ancestor="true" source="auto">
+        <property name="praysOfTheDay_INTEGER_IDX" direction="asc"/>
+    </datastore-index>
+
+</datastore-indexes>
