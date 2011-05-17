@@ -1,34 +1,18 @@
 package il.ac.tau.team3.common;
 
 import il.ac.tau.team3.datastore.PMF;
-import il.ac.tau.team3.datastore.PlaceLocation;
-import il.ac.tau.team3.datastore.UserLocation;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
 
 import java.util.ArrayList;
 
 import javax.jdo.PersistenceManager;
-import javax.jdo.annotations.EmbeddedOnly;
 import javax.jdo.annotations.IdGeneratorStrategy;
-import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.NotPersistent;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
-import javax.persistence.Basic;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.PrePersist;
-
-import org.codehaus.jackson.annotate.JsonGetter;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonSetter;
 
@@ -60,16 +44,16 @@ public class Pray  implements Serializable{
 	
 	@Persistent
 	@JsonIgnore
-	PlaceLocation place;
+	GeneralPlace place;
 	
 	
 	@JsonIgnore
-	public PlaceLocation getPlace() {
+	public GeneralPlace getPlace() {
 		return place;
 	}
 
 	@JsonIgnore
-	public void setPlace(PlaceLocation place) {
+	public void setPlace(GeneralPlace place) {
 		this.place = place;
 	}
 
@@ -162,12 +146,12 @@ public class Pray  implements Serializable{
 	}
 	
 	public void addJoiner(GeneralUser user){
-		this.joinersId.add(UserLocation.getUserByName(user.getName()).getKey());
+		this.joinersId.add(user.getId());
 	}
 	
 	public void removeJoiner(GeneralUser user){
 		if(this.getJoiners().contains(user)){
-			this.joinersId.remove(UserLocation.getUserByName(user.getName()).getKey());
+			this.joinersId.remove(user.getId());
 		}
 	}
 
@@ -184,7 +168,7 @@ public class Pray  implements Serializable{
 	public void setJoiners(ArrayList<GeneralUser> joiners) {
 		this.joiners = joiners;
 		for (GeneralUser gu : joiners)	{
-        	joinersId.add(UserLocation.getUserByName(gu.getName()).getKey());
+        	joinersId.add(gu.getId());
         }
 	}
 
@@ -192,7 +176,7 @@ public class Pray  implements Serializable{
 		joiners = new ArrayList<GeneralUser>();
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		for (long l : joinersId)	{
-			joiners.add(new GeneralUser(pm.getObjectById(UserLocation.class, l)));
+			joiners.add(pm.getObjectById(GeneralUser.class, l));
 		}
 		return joiners;
 	}

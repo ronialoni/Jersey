@@ -1,7 +1,7 @@
 
 package il.ac.tau.team3.common;
 
-import il.ac.tau.team3.datastore.UserLocation;
+
 
 import java.io.Serializable;
 
@@ -33,9 +33,11 @@ public class GeneralUser extends GeneralLocation implements Serializable {
 			this.status = status;
 		}
 		
-		public GeneralUser(UserLocation serverObj) {
-			this(serverObj.getName(), new SPGeoPoint((int)(serverObj.getLatitude()*1000000), 
-						(int)(serverObj.getLongitude()*1000000)), serverObj.getStatus(), serverObj.getFirstName(), serverObj.getLastName());
+		public GeneralUser(GeneralUser obj) {
+			super(obj);
+			setStatus(obj.getStatus());
+			setFirstName(obj.getFirstName());
+			setLastName(obj.getLastName());
 			
 
 		}
@@ -45,6 +47,13 @@ public class GeneralUser extends GeneralLocation implements Serializable {
 			this.firstName = firstName;
 			this.lastName = lastName;
 			this.status = status;
+		}
+		
+		public void cloneUserData(GeneralUser obj)	{
+			super.closeUserData(obj);
+			setStatus(obj.getStatus());
+			setFirstName(obj.getFirstName());
+			setLastName(obj.getLastName());
 		}
 	
 		public String getStatus() {
