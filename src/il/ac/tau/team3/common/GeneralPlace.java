@@ -23,13 +23,13 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 3680632953183211194L;
-	
+
 	@Persistent
 	private String address;
-	
+
 	@NotPersistent
 	private GeneralUser owner;
-	
+
 	@JsonIgnore
 	private long		ownerId; 
 
@@ -58,13 +58,13 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 		this.startDate = new Date();
 		this.endDate = new Date();
 	}
-	
+
 	public GeneralPlace(GeneralPlace p){
 		super();
 		cloneUserData(p);
 		this.setId(p.getId());
 	}
-	
+
 	public void cloneUserData(GeneralPlace obj)	{
 		super.closeUserData(obj);
 		this.setPraysOfTheDay(obj.getPraysOfTheDay());
@@ -73,7 +73,7 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 		this.setStartDate(obj.getStartDate());
 		this.setOwnerId(obj.getOwnerId());
 		this.setOwner(obj.getOwner());
-		
+
 	}
 
 	public GeneralPlace(String name, String address , SPGeoPoint spGeoPoint){
@@ -83,7 +83,7 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 		this.startDate = new Date();
 		this.endDate = new Date();
 	}
-	
+
 
 	public GeneralPlace(GeneralUser owner, String name, String address , SPGeoPoint spGeoPoint, Date startDate,Date endDate){
 		super(spGeoPoint,name);
@@ -97,46 +97,50 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 
 	@JsonIgnore
 	public void setPraysOfTheDay(int prayNumber, Pray praysOfTheDay) {
-		
+
 		try	{
-    		this.praysOfTheDay.set(prayNumber, praysOfTheDay);
-    	} catch (IndexOutOfBoundsException e){
-    		
-    	}
-    	
-		
+			this.praysOfTheDay.set(prayNumber, praysOfTheDay);
+		} catch (IndexOutOfBoundsException e){
+
+		}
+
+
 	}
-	
+
 	@JsonIgnore
 	public void setPraysOfTheDay(String prayName, Pray praysOfTheDay) {
 		for (int i = 0; i < this.praysOfTheDay.size(); i++)	{
-			if ( this.praysOfTheDay.get(i).getName().equals(praysOfTheDay.getName()))	{
-				this.praysOfTheDay.set(i, praysOfTheDay);
+			if(this.praysOfTheDay.get(i) != null){
+				if ( this.praysOfTheDay.get(i).getName().equals(praysOfTheDay.getName()))	{
+					this.praysOfTheDay.set(i, praysOfTheDay);
+				}
 			}
 		}
-    	
+
 	}
-	
+
 	public void setPraysOfTheDay(List<Pray> praysOfTheDay)	{
 		this.praysOfTheDay = praysOfTheDay;
-		
+
 	}
-	
+
 	public List<Pray> getPraysOfTheDay()	{
 		return this.praysOfTheDay;
-		
+
 	}
-	
+
 	@JsonIgnore
 	public Pray getPrayByName(String prayName)	{
 		for (int i = 0; i < this.praysOfTheDay.size(); i++)	{
-			if ( this.praysOfTheDay.get(i).getName().equals(prayName))	{
-				return this.praysOfTheDay.get(i); 
+			if(this.praysOfTheDay.get(i) != null){
+				if ( this.praysOfTheDay.get(i).getName().equals(prayName))	{
+					return this.praysOfTheDay.get(i); 
+				}
 			}
 		}
-		
+
 		return null;
-		
+
 	}
 
 
@@ -183,27 +187,27 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 
 
 	@JsonIgnore
-    public boolean IsJoinerSigned(int prayNumber, GeneralUser joiner){
-            try	{
-            	return (this.praysOfTheDay.get(prayNumber).isJoinerSigned(joiner));
-            } catch (IndexOutOfBoundsException e)	{	
-            	return false;
-            } catch (NullPointerException e)	{
-            	return false;
-            }
-            
-    }
+	public boolean IsJoinerSigned(int prayNumber, GeneralUser joiner){
+		try	{
+			return (this.praysOfTheDay.get(prayNumber).isJoinerSigned(joiner));
+		} catch (IndexOutOfBoundsException e)	{	
+			return false;
+		} catch (NullPointerException e)	{
+			return false;
+		}
 
-    @JsonIgnore  
-    public int getNumberOfPrayers(int prayNumber){
-    	try	{
-            return this.praysOfTheDay.get(prayNumber).numberOfJoiners();
-    	}  catch (IndexOutOfBoundsException e)	{	
-        	return 0;
-        } catch (NullPointerException e)	{
-        	return 0;
-        }
-    }
+	}
+
+	@JsonIgnore  
+	public int getNumberOfPrayers(int prayNumber){
+		try	{
+			return this.praysOfTheDay.get(prayNumber).numberOfJoiners();
+		}  catch (IndexOutOfBoundsException e)	{	
+			return 0;
+		} catch (NullPointerException e)	{
+			return 0;
+		}
+	}
 
 	public void setOwnerId(Long ownerId) {
 		if (null != ownerId)	{
