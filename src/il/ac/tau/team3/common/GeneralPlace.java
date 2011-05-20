@@ -110,10 +110,12 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 	@JsonIgnore
 	public void setPraysOfTheDay(String prayName, Pray praysOfTheDay) {
 		for (int i = 0; i < this.praysOfTheDay.size(); i++)	{
-			if(this.praysOfTheDay.get(i) != null){
+			try	{
 				if ( this.praysOfTheDay.get(i).getName().equals(praysOfTheDay.getName()))	{
 					this.praysOfTheDay.set(i, praysOfTheDay);
 				}
+			} catch (NullPointerException e)	{
+				
 			}
 		}
 
