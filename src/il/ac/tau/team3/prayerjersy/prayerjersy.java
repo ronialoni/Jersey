@@ -1,6 +1,5 @@
 package il.ac.tau.team3.prayerjersy;
 
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -14,8 +13,6 @@ import il.ac.tau.team3.common.Pray;
 import il.ac.tau.team3.datastore.PMF;
 
 
-import javax.jdo.Extent;
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.ws.rs.Consumes;
@@ -33,6 +30,7 @@ import com.beoui.geocell.GeocellManager;
 import com.beoui.geocell.JDOGeocellQueryEngine;
 import com.beoui.geocell.model.GeocellQuery;
 import com.beoui.geocell.model.Point;
+import com.google.appengine.api.datastore.Key;
 
 //The Java class will be hosted at the URI path "/helloworld"
 
@@ -274,17 +272,38 @@ public class prayerjersy {
 		}
 	}
 
+	
+	@SuppressWarnings("unchecked")
 	@GET
 	@Path("/placesbyowner")
 	@Produces(MediaType.APPLICATION_JSON)
-	public GeneralPlace[] retrieveAllOwnerPlaces(@QueryParam("owner") String owner) {
-		/* REWRITE */
-		return null;
+	public List<GeneralPlace> retrieveAllOwnerPlaces(@QueryParam("id") long owner) {
+		Query q = pm.newQuery(GeneralPlace.class, "ownerId==id_");
+		q.declareParameters("long id_");
+		return (List<GeneralPlace>) q.execute(owner);
 
 	}
-
-
-
+	
+	@SuppressWarnings("unchecked")
+	@GET
+	@Path("/placesbyjoiner")
+	@Produces(MediaType.APPLICATION_JSON)
+	public GeneralPlace[] retrieveAllJoinerPlaces(@QueryParam("id") long joiner) {
+		Query q = pm.newQuery("select key from "+ Pray.class.getName() +" where joinersId == id_");
+		q.declareParameters("long id_");
+		List<Key> praysId = (List<Key>)q.execute(joiner);
+		
+		GeneralPlace[] places = new GeneralPlace[praysId.size()];
+		int i = 0;
+		for (Key k : praysId)	{
+			places[i++] = pm.getObjectById(GeneralPlace.class, k.getParent().getId());
+		}
+		return places;
+		
+		
+	}
+	
+	
 	@POST
 	@Path("/deleteplace")
 	@Consumes(MediaType.APPLICATION_JSON)
