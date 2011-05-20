@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cronentries>
+   <cron> 
+       <url>/resources/prayerjersy/deleteexpiredplaces</url>  
+          <description>Delete all expired places</description> 
+              <schedule>every day 00:01</schedule>  
+      </cron> 
+    </cronentries>         

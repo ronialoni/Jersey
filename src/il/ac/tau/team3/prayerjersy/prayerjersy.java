@@ -1,6 +1,9 @@
 package il.ac.tau.team3.prayerjersy;
 
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -11,6 +14,7 @@ import il.ac.tau.team3.common.Pray;
 import il.ac.tau.team3.datastore.PMF;
 
 
+import javax.jdo.Extent;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -91,30 +95,30 @@ public class prayerjersy {
 		Long id;
 		GeneralUser userx;
 		try{
-			
+
 			Collection<GeneralUser> list = (Collection<GeneralUser>) q.execute(user.getName());
 			if(list.isEmpty()){
 
 				userx = new GeneralUser(user);
 				userx.setId(null);
 				pm.makePersistent(userx);
-				
+
 
 			} else	{
 				userx = list.iterator().next();
 				userx.cloneUserData(user);
 			}
-			
+
 			id = userx.getId();
 		}
 		finally{
 			q.closeAll();
 			pm.close();
-			
+
 		}
 
 		return id;
-		
+
 	}
 
 	@POST
@@ -212,7 +216,35 @@ public class prayerjersy {
 
 	}
 
+	@GET
+	@Path("/deleteexpiredplaces")
+	@Produces(MediaType.APPLICATION_JSON)
+	public int DeleteExpiredPlaces(@QueryParam("l") double l){
+		Query q = pm.newQuery(GeneralPlace.class);
+		Collection<GeneralPlace> list = (Collection<GeneralPlace>) q.execute();
+		Date today = new Date();
+		if(!list.isEmpty()){
+			Iterator<GeneralPlace> iter = list.iterator();
+			int size = list.size();
+			try{
+				for(int i = 0 ; i < size ; i++){
+					GeneralPlace p = (GeneralPlace) iter.next();
+					Date placeDate = p.getEndDate();
+					if(placeDate !=null){
+						if(today.compareTo(placeDate) > 0){
+							pm.deletePersistent(p);
+						}
+					}
+				}
+				
 
+
+			}finally{
+				pm.close();
+			}
+		}
+		return 1;
+	}
 	@GET
 	@Path("/users")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -241,17 +273,17 @@ public class prayerjersy {
 			return places;
 		}
 	}
-	
+
 	@GET
 	@Path("/placesbyowner")
 	@Produces(MediaType.APPLICATION_JSON)
 	public GeneralPlace[] retrieveAllOwnerPlaces(@QueryParam("owner") String owner) {
 		/* REWRITE */
 		return null;
-		
+
 	}
-	
-	
+
+
 
 	@POST
 	@Path("/deleteplace")
@@ -263,11 +295,11 @@ public class prayerjersy {
 
 		GeneralPlace placex = pm.getObjectById(GeneralPlace.class, place.getId());
 		try{
-		if(placex!=null){
-			CacheCls.getPlaceCache().clear();
-			pm.deletePersistent(placex);
-			return;
-		}
+			if(placex!=null){
+				CacheCls.getPlaceCache().clear();
+				pm.deletePersistent(placex);
+				return;
+			}
 		}finally{
 			pm.close();
 		}
@@ -283,7 +315,7 @@ public class prayerjersy {
 		List<GeneralUser> results = GeocellManager.proximitySearch(center, 100000000, radius, GeneralUser.class, baseQuery, qe, DEFAULT_SEARCH_RESOlUTION);
 		return results;
 	}
-	
+
 	private List<GeneralPlace> requestDatastoreForPlaces(double longitude,double latitude,long radius){
 		GeocellQuery baseQuery = new GeocellQuery();
 		Point center = new Point (latitude, longitude);
