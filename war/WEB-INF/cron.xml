@@ -4,5 +4,6 @@
        <url>/resources/prayerjersy/deleteexpiredplaces</url>  
           <description>Delete all expired places</description> 
               <schedule>every day 00:01</schedule>  
+               <timezone>Asia/Jerusalem</timezone> 
       </cron> 
     </cronentries>         
