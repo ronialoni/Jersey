@@ -32,7 +32,11 @@ public class GeneralLocation implements Serializable{
 	@NotPersistent
 	private SPGeoPoint spGeoPoint;
 	
+	@Persistent
 	private String name;
+	
+	@Persistent
+	private String address;
 	
 	@PrimaryKey
 	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
@@ -113,6 +117,13 @@ public class GeneralLocation implements Serializable{
 		this.spGeoPoint = spGeoPoint;
 		this.name = name;
 	}
+	
+	public GeneralLocation(SPGeoPoint spGeoPoint, String name, String address) {
+		this.spGeoPoint = spGeoPoint;
+		this.name = name;
+		this.address = address;
+	}
+	
 	public void setSpGeoPoint(SPGeoPoint spGeoPoint) {
 		this.spGeoPoint = spGeoPoint;
 		setGeocells(spGeoPoint.getLatitudeInDegrees(), spGeoPoint.getLongitudeInDegrees());
@@ -137,4 +148,14 @@ public class GeneralLocation implements Serializable{
 		setGeocells(obj.getLatitude(), obj.getLongitude());
 		
 	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	
+	
 }
