@@ -24,6 +24,8 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 	 */
 	private static final long serialVersionUID = 3680632953183211194L;
 
+	@Persistent
+	private String address;
 
 	@NotPersistent
 	private GeneralUser owner;
@@ -75,7 +77,8 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 	}
 
 	public GeneralPlace(String name, String address , SPGeoPoint spGeoPoint){
-		super(spGeoPoint,name,address);
+		super(spGeoPoint,name);
+		this.address = address;
 		initializePraysOfTheDay();
 		this.startDate = new Date();
 		this.endDate = new Date();
@@ -83,7 +86,8 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 
 
 	public GeneralPlace(GeneralUser owner, String name, String address , SPGeoPoint spGeoPoint, Date startDate,Date endDate){
-		super(spGeoPoint,name,address);
+		super(spGeoPoint,name);
+		this.address = address;
 		initializePraysOfTheDay();
 		this.owner = owner;
 		this.startDate = startDate;
@@ -174,7 +178,15 @@ public class GeneralPlace extends GeneralLocation implements Serializable{
 	}
 
 
-	
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+
 
 	@JsonIgnore
 	public boolean IsJoinerSigned(int prayNumber, GeneralUser joiner){
