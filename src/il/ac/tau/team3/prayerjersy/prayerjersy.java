@@ -132,6 +132,13 @@ public class prayerjersy {
 		GeneralPlace placex = null;
 		Long id;
 		try{
+			if (place.getOwner().getId() == null)	{
+				return null;
+			}
+			GeneralUser owner = (GeneralUser)pm.getObjectById(GeneralUser.class, place.getOwner().getId());
+			if (!owner.equals(place.getOwner()))	{
+				return null;
+			}
 			if (place.getId() != null)	{
 				placex = (GeneralPlace)pm.getObjectById(GeneralPlace.class, place.getId());
 			}
