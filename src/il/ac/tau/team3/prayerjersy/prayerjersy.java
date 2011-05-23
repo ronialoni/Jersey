@@ -159,7 +159,7 @@ public class prayerjersy {
 	@POST
 	@Path("/addjoiner")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void UpdatePlaceJoinersByName_Add(PlaceAndUser pau){
+	public void UpdatePlaceJoinersByUser(PlaceAndUser pau){
 		GeneralUser user = pau.getUser();
 		GeneralPlace place = pau.getPlace();
 		boolean praysWishes[] = pau.getPraysWishes();
@@ -177,8 +177,18 @@ public class prayerjersy {
 				for (int i = 0; i < praysWishes.length; i++)	{
 					if(praysWishes[i]){
 						Pray p = placex.getPrayByName(praysNames[i]); 
-						if(!p.isJoinerSigned(user)){
-							p.addJoiner(user);
+						if(p != null){
+							if(!p.isJoinerSigned(user)){
+								p.addJoiner(user);
+							}
+						}
+					}
+					if(!praysWishes[i]){
+						Pray p = placex.getPrayByName(praysNames[i]); 
+						if(p != null){
+							if(p.isJoinerSigned(user)){
+								p.removeJoiner(user);
+							}
 						}
 					}
 				}
@@ -241,7 +251,7 @@ public class prayerjersy {
 						}
 					}
 				}
-				
+
 
 
 			}finally{
@@ -279,7 +289,7 @@ public class prayerjersy {
 		}
 	}
 
-	
+
 	@SuppressWarnings("unchecked")
 	@GET
 	@Path("/placesbyowner")
@@ -290,7 +300,7 @@ public class prayerjersy {
 		return (List<GeneralPlace>) q.execute(owner);
 
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@GET
 	@Path("/placesbyjoiner")
@@ -299,18 +309,18 @@ public class prayerjersy {
 		Query q = pm.newQuery("select key from "+ Pray.class.getName() +" where joinersId == id_");
 		q.declareParameters("long id_");
 		List<Key> praysId = (List<Key>)q.execute(joiner);
-		
+
 		GeneralPlace[] places = new GeneralPlace[praysId.size()];
 		int i = 0;
 		for (Key k : praysId)	{
 			places[i++] = pm.getObjectById(GeneralPlace.class, k.getParent().getId());
 		}
 		return places;
-		
-		
+
+
 	}
-	
-	
+
+
 	@POST
 	@Path("/deleteplace")
 	@Consumes(MediaType.APPLICATION_JSON)

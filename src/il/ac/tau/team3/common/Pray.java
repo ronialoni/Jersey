@@ -138,7 +138,7 @@ public class Pray  implements Serializable{
 	}
 	
 	public boolean isJoinerSigned(GeneralUser joiner){
-		return this.getJoiners().contains(joiner);
+		return this.getJoinersId().contains(joiner.getId());
 	}
 	
 	public int numberOfJoiners(){
@@ -150,7 +150,7 @@ public class Pray  implements Serializable{
 	}
 	
 	public void removeJoiner(GeneralUser user){
-		if(this.getJoiners().contains(user)){
+		if(this.getJoinersId().contains(user.getId())){
 			this.joinersId.remove(user.getId());
 		}
 	}
