@@ -15,6 +15,7 @@ import il.ac.tau.team3.datastore.PMF;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
+import javax.jdo.Transaction;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -123,21 +124,21 @@ public class prayerjersy {
 	@Path("/updateplacebylocation")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Long UpdatePlaceLocationByLocation(GeneralPlace place){
+	public long UpdatePlaceLocationByLocation(GeneralPlace place){
 
 		//Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE " +
 		//		"x.latitude="+place.getSpGeoPoint().getLatitudeInDegrees()+" AND x.longitude="+place.getSpGeoPoint().getLongitudeInDegrees());
 		CacheCls.getPlaceCache().clear();
 
 		GeneralPlace placex = null;
-		Long id;
+		long id = -1;
 		try{
 			if (place.getOwner().getId() == null)	{
-				return null;
+				return -1;
 			}
 			GeneralUser owner = (GeneralUser)pm.getObjectById(GeneralUser.class, place.getOwner().getId());
 			if (!owner.equals(place.getOwner()))	{
-				return null;
+				return -1;
 			}
 			if (place.getId() != null)	{
 				placex = (GeneralPlace)pm.getObjectById(GeneralPlace.class, place.getId());
@@ -146,7 +147,8 @@ public class prayerjersy {
 				placex.cloneUserData(place);
 			} else	{
 				placex = new GeneralPlace(place);
-				pm.makePersistent(place);
+				pm.makePersistent(placex);
+
 			}
 			id = placex.getId();
 		}
@@ -160,14 +162,16 @@ public class prayerjersy {
 	@POST
 	@Path("/addjoiner")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void UpdatePlaceJoinersByUser(PlaceAndUser pau){
+	@Produces(MediaType.APPLICATION_JSON)
+	public int UpdatePlaceJoinersByUser(PlaceAndUser pau){
 		GeneralUser user = pau.getUser();
 		GeneralPlace place = pau.getPlace();
 		boolean praysWishes[] = pau.getPraysWishes();
+		int status = 0;
 		final String[] praysNames = new String[]{"Shaharit", "Minha", "Arvit"};
 
 		if(place == null || user == null || place.getId() == null || user.getId() == null){
-			return;
+			return 0;
 		}
 
 		GeneralPlace placex = pm.getObjectById(GeneralPlace.class, place.getId());
@@ -180,6 +184,7 @@ public class prayerjersy {
 						Pray p = placex.getPrayByName(praysNames[i]); 
 						if(p != null){
 							if(!p.isJoinerSigned(user)){
+								status = status << 1 + 1;
 								p.addJoiner(user);
 							}
 						}
@@ -197,19 +202,23 @@ public class prayerjersy {
 		}finally{
 			pm.close();
 		}
+		
+		return status;
 	}		
 
 
 	@POST
 	@Path("/removejoiner")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void UpdatePlaceJoinersByName_Remove(PlaceAndUser pau){
+	@Produces(MediaType.APPLICATION_JSON)
+	public int UpdatePlaceJoinersByName_Remove(PlaceAndUser pau){
+		int changed = 0;
 		GeneralUser user = pau.getUser();
 		GeneralPlace place = pau.getPlace();
 		boolean praysWishes[] = pau.getPraysWishes();
 		final String[] praysNames = new String[]{"Shaharit", "Minha", "Arvit"};
 		if(place == null || user == null || place.getId() == null || user.getId() == null){
-			return;
+			return 0;
 		}
 
 		GeneralPlace placex = pm.getObjectById(GeneralPlace.class, place.getId());
@@ -221,6 +230,7 @@ public class prayerjersy {
 					if(praysWishes[i]){
 						Pray p = placex.getPrayByName(praysNames[i]); 
 						if(p.isJoinerSigned(user)){
+							changed = changed << 1 + 1;
 							p.removeJoiner(user);
 						}
 					}
@@ -229,6 +239,8 @@ public class prayerjersy {
 		}finally{
 			pm.close();
 		}
+		
+		return changed;
 
 	}
 
@@ -325,9 +337,10 @@ public class prayerjersy {
 	@POST
 	@Path("/deleteplace")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void removePlace(GeneralPlace place) {
+	@Produces(MediaType.APPLICATION_JSON)
+	public long removePlace(GeneralPlace place) {
 		if(place == null || place.getId()==null){
-			return;
+			return -1;
 		}
 
 		GeneralPlace placex = pm.getObjectById(GeneralPlace.class, place.getId());
@@ -335,11 +348,13 @@ public class prayerjersy {
 			if(placex!=null){
 				CacheCls.getPlaceCache().clear();
 				pm.deletePersistent(placex);
-				return;
+				return place.getId();
 			}
 		}finally{
 			pm.close();
 		}
+		
+		return -1;
 
 	}
 
