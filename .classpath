@@ -19,7 +19,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang-2.6.jar"/>
 	<classpathentry kind="lib" path="libs/commons-lang-2.6-javadoc.jar"/>
 	<classpathentry kind="lib" path="libs/commons-lang-2.6-sources.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/geocell-0.0.7-20110512.205319-1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/geocell-0.0.7-20110512.205319-1.jar" sourcepath="war/WEB-INF/lib/geocell-0.0.7-20110512.205319-1.jar"/>
 	<classpathentry kind="lib" path="libs/geocell-0.0.7-20110512.205319-1-javadoc.jar"/>
 	<classpathentry kind="lib" path="libs/geocell-0.0.7-20110512.205319-1-sources.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>

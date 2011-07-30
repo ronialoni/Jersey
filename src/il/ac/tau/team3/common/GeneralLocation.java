@@ -91,11 +91,10 @@ public class GeneralLocation implements Serializable{
 	}
 
 	public void setGeocells(double lat,double longt) {
-		Point p = new Point(longitude, latitude);
+		Point p = new Point(latitude, longitude);
 		geocells = GeocellManager.generateGeoCell(p);
 		this.longitude = longt;
 		this.latitude = lat;
-		geocells = GeocellManager.generateGeoCell(p);
 	}
 	
 	public GeneralLocation(){
