@@ -133,7 +133,11 @@ public class GeneralLocation implements Serializable{
 		setLatitude(obj.getLatitude());
 		setLongitude(obj.getLongitude());
 		setName(obj.getName());
-		setGeocells(obj.getLatitude(), obj.getLongitude());
+		try{
+			setGeocells(obj.getLatitude(), obj.getLongitude());
+		}catch(Exception e){
+			setGeocells(0.0,0.0);
+		}
 		
 	}
 }

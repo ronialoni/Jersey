@@ -1,5 +1,6 @@
 package il.ac.tau.team3.prayerjersy;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -323,12 +324,30 @@ public class prayerjersy {
 		q.declareParameters("long id_");
 		List<Key> praysId = (List<Key>)q.execute(joiner);
 
-		GeneralPlace[] places = new GeneralPlace[praysId.size()];
+		ArrayList<GeneralPlace> places = new ArrayList<GeneralPlace>(praysId.size());
 		int i = 0;
 		for (Key k : praysId)	{
-			places[i++] = pm.getObjectById(GeneralPlace.class, k.getParent().getId());
+			places.add(pm.getObjectById(GeneralPlace.class, k.getParent().getId()));
 		}
-		return places;
+		i=0;
+		for(i=0; i<places.size();++i){
+			try{
+			if(places.get(i).getOwnerId() == joiner){
+				places.remove(i);
+				i--;
+			}
+			}catch(NullPointerException e){
+				
+			}
+		}
+		GeneralPlace placesArray[] = new GeneralPlace[places.size()];
+		i=0;
+		if(places.size()!= 0 ){
+		for(GeneralPlace p : places){
+			placesArray[i] = p;
+		}
+		}
+		return placesArray;
 
 
 	}
