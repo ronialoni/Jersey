@@ -53,7 +53,7 @@ public class GeneralLocation implements Serializable{
 	@Geocells
 	private List<String> geocells = new ArrayList<String>();
 	
-	
+	 
 	public void setGeocells(List<String> geocellsP) {
 		this.geocells = geocellsP;
 	}
