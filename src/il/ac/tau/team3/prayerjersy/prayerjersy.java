@@ -46,20 +46,29 @@ public class prayerjersy {
 
 
 	public prayerjersy() {
-		//entity = EMF.get().createEntityManager();
 		this.pm = PMF.get().getPersistenceManager();
 	}
-
-	/*@GET
-	@Path("/user/{id}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public GeneralUser retrieveUser(@PathParam("id") int id) {
-		if(id < users.size()){
-			return users.get(id);
-		}
-		else return null;
+	
+	private List<GeneralUser> requestDatastoreForUsers(double longitude,double latitude,long radius){
+		//GeocellQuery baseQuery = new GeocellQuery("select from UserLocation");
+		GeocellQuery baseQuery = new GeocellQuery();
+		Point center = new Point (latitude, longitude);
+		JDOGeocellQueryEngine qe = new JDOGeocellQueryEngine();
+		qe.setPersistenceManager(pm);
+		List<GeneralUser> results = GeocellManager.proximitySearch(center, 100000000, radius, GeneralUser.class, baseQuery, qe, DEFAULT_SEARCH_RESOlUTION);
+		return results;
 	}
-	 */
+
+	private List<GeneralPlace> requestDatastoreForPlaces(double longitude,double latitude,long radius){
+		GeocellQuery baseQuery = new GeocellQuery();
+		Point center = new Point (latitude, longitude);
+		JDOGeocellQueryEngine qe = new JDOGeocellQueryEngine();
+		qe.setPersistenceManager(pm);
+		List<GeneralPlace> results = GeocellManager.proximitySearch(center, 100000000, radius, GeneralPlace.class, baseQuery, qe, DEFAULT_SEARCH_RESOlUTION);
+		return results;
+	}
+
+
 	@GET
 	@Path("/updateuserbyid")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -81,10 +90,70 @@ public class prayerjersy {
 		return false;
 	}
 
+	@GET
+	@Path("/getuserbyid")
+	@Produces(MediaType.APPLICATION_JSON)
+	public GeneralUser GetUserById(@QueryParam("id") long id){
+		try{
+			GeneralUser userx = pm.getObjectById(GeneralUser.class, id);
+			return userx;
+			}
+		finally{
+			pm.close();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@GET
+	@Path("/getplacesbyowner")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<GeneralPlace> retrieveAllOwnerPlaces(@QueryParam("id") long owner) {
+		Query q = pm.newQuery(GeneralPlace.class, "ownerId==id_");
+		q.declareParameters("long id_");
+		return (List<GeneralPlace>) q.execute(owner);
+
+	}
+
+	@SuppressWarnings("unchecked")
+	@GET
+	@Path("/getplacesbyjoiner")
+	@Produces(MediaType.APPLICATION_JSON)
+	public GeneralPlace[] retrieveAllJoinerPlaces(@QueryParam("id") long joiner) {
+		Query q = pm.newQuery("select key from "+ Pray.class.getName() +" where joinersId == id_");
+		q.declareParameters("long id_");
+		List<Key> praysId = (List<Key>)q.execute(joiner);
+
+		ArrayList<GeneralPlace> places = new ArrayList<GeneralPlace>(praysId.size());
+		int i = 0;
+		for (Key k : praysId)	{
+			places.add(pm.getObjectById(GeneralPlace.class, k.getParent().getId()));
+		}
+		i=0;
+		for(i=0; i<places.size();++i){
+			try{
+			if(places.get(i).getOwnerId() == joiner){
+				places.remove(i);
+				i--;
+			}
+			}catch(NullPointerException e){
+				
+			}
+		}
+		GeneralPlace placesArray[] = new GeneralPlace[places.size()];
+		i=0;
+		if(places.size()!= 0 ){
+		for(GeneralPlace p : places){
+			placesArray[i] = p;
+		}
+		}
+		return placesArray;
 
 
+	}
+
+	
 	@POST
-	@Path("/updateuserbyname")
+	@Path("/updateuser")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Long UpdateUserLocationByName(GeneralUser user){
@@ -121,47 +190,10 @@ public class prayerjersy {
 
 	}
 
-	@POST
-	@Path("/updateplacebylocation")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public long UpdatePlaceLocationByLocation(GeneralPlace place){
-
-		//Query q = entity.createQuery("SELECT x FROM PlaceLocation x WHERE " +
-		//		"x.latitude="+place.getSpGeoPoint().getLatitudeInDegrees()+" AND x.longitude="+place.getSpGeoPoint().getLongitudeInDegrees());
-		CacheCls.getPlaceCache().clear();
-
-		GeneralPlace placex = null;
-		long id = -1;
-		try{
-			if (place.getOwner().getId() == null)	{
-				return -1;
-			}
-			GeneralUser owner = (GeneralUser)pm.getObjectById(GeneralUser.class, place.getOwner().getId());
-			if (!owner.equals(place.getOwner()))	{
-				return -1;
-			}
-			if (place.getId() != null)	{
-				placex = (GeneralPlace)pm.getObjectById(GeneralPlace.class, place.getId());
-			}
-			if (placex != null)	{
-				placex.cloneUserData(place);
-			} else	{
-				placex = new GeneralPlace(place);
-				pm.makePersistent(placex);
-
-			}
-			id = placex.getId();
-		}
-		finally{
-			pm.close();
-		}
-		return id;
-	}
-
+	
 	
 	@POST
-	@Path("/addjoiner")
+	@Path("/updatejoinerstatus")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public int UpdatePlaceJoinersByUser(PlaceAndUser pau){
@@ -207,44 +239,44 @@ public class prayerjersy {
 		return status;
 	}		
 
-
 	@POST
-	@Path("/removejoiner")
+	@Path("/updateplace")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public int UpdatePlaceJoinersByName_Remove(PlaceAndUser pau){
-		int changed = 0;
-		GeneralUser user = pau.getUser();
-		GeneralPlace place = pau.getPlace();
-		boolean praysWishes[] = pau.getPraysWishes();
-		final String[] praysNames = new String[]{"Shaharit", "Minha", "Arvit"};
-		if(place == null || user == null || place.getId() == null || user.getId() == null){
-			return 0;
-		}
+	public long UpdatePlaceLocationByLocation(GeneralPlace place){
+		
+		CacheCls.getPlaceCache().clear();
 
-		GeneralPlace placex = pm.getObjectById(GeneralPlace.class, place.getId());
+		GeneralPlace placex = null;
+		long id = -1;
 		try{
-			if(placex!=null){
-				//URI u = UriBuilder.fromResource(PlaceLocation.class).build(placex);
-				CacheCls.getPlaceCache().clear();
-				for (int i = 0; i < praysWishes.length; i++)	{
-					if(praysWishes[i]){
-						Pray p = placex.getPrayByName(praysNames[i]); 
-						if(p.isJoinerSigned(user)){
-							changed = changed << 1 + 1;
-							p.removeJoiner(user);
-						}
-					}
-				}
+			if (place.getOwner().getId() == null)	{
+				return -1;
 			}
-		}finally{
+			GeneralUser owner = (GeneralUser)pm.getObjectById(GeneralUser.class, place.getOwner().getId());
+			if (!owner.equals(place.getOwner()))	{
+				return -1;
+			}
+			if (place.getId() != null)	{
+				placex = (GeneralPlace)pm.getObjectById(GeneralPlace.class, place.getId());
+			}
+			if (placex != null)	{
+				placex.cloneUserData(place);
+			} else	{
+				placex = new GeneralPlace(place);
+				pm.makePersistent(placex);
+
+			}
+			id = placex.getId();
+		}
+		finally{
 			pm.close();
 		}
-		
-		return changed;
-
+		return id;
 	}
 
+
+	
 	@GET
 	@Path("/deleteexpiredplaces")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -275,7 +307,7 @@ public class prayerjersy {
 		return 1;
 	}
 	@GET
-	@Path("/users")
+	@Path("/getallusers")
 	@Produces(MediaType.APPLICATION_JSON)
 	public GeneralUser[] retrieveAllUsers(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("radius")long radius) {
 		ServerQuery query  = new ServerQuery(latitude, longitude, radius, ServerQuery.DataType.USERS);
@@ -290,7 +322,7 @@ public class prayerjersy {
 	}
 
 	@GET
-	@Path("/places")
+	@Path("/getallplaces")
 	@Produces(MediaType.APPLICATION_JSON)
 	public GeneralPlace[] retrieveAllPlaces(@QueryParam("longitude") double longitude, @QueryParam("latitude")double latitude, @QueryParam("radius")long radius) {
 		ServerQuery query  = new ServerQuery(latitude, longitude, radius, ServerQuery.DataType.PLACES);
@@ -304,54 +336,7 @@ public class prayerjersy {
 	}
 
 
-	@SuppressWarnings("unchecked")
-	@GET
-	@Path("/placesbyowner")
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<GeneralPlace> retrieveAllOwnerPlaces(@QueryParam("id") long owner) {
-		Query q = pm.newQuery(GeneralPlace.class, "ownerId==id_");
-		q.declareParameters("long id_");
-		return (List<GeneralPlace>) q.execute(owner);
-
-	}
-
-	@SuppressWarnings("unchecked")
-	@GET
-	@Path("/placesbyjoiner")
-	@Produces(MediaType.APPLICATION_JSON)
-	public GeneralPlace[] retrieveAllJoinerPlaces(@QueryParam("id") long joiner) {
-		Query q = pm.newQuery("select key from "+ Pray.class.getName() +" where joinersId == id_");
-		q.declareParameters("long id_");
-		List<Key> praysId = (List<Key>)q.execute(joiner);
-
-		ArrayList<GeneralPlace> places = new ArrayList<GeneralPlace>(praysId.size());
-		int i = 0;
-		for (Key k : praysId)	{
-			places.add(pm.getObjectById(GeneralPlace.class, k.getParent().getId()));
-		}
-		i=0;
-		for(i=0; i<places.size();++i){
-			try{
-			if(places.get(i).getOwnerId() == joiner){
-				places.remove(i);
-				i--;
-			}
-			}catch(NullPointerException e){
-				
-			}
-		}
-		GeneralPlace placesArray[] = new GeneralPlace[places.size()];
-		i=0;
-		if(places.size()!= 0 ){
-		for(GeneralPlace p : places){
-			placesArray[i] = p;
-		}
-		}
-		return placesArray;
-
-
-	}
-
+	
 
 	@POST
 	@Path("/deleteplace")
@@ -377,24 +362,7 @@ public class prayerjersy {
 
 	}
 
-	private List<GeneralUser> requestDatastoreForUsers(double longitude,double latitude,long radius){
-		//GeocellQuery baseQuery = new GeocellQuery("select from UserLocation");
-		GeocellQuery baseQuery = new GeocellQuery();
-		Point center = new Point (latitude, longitude);
-		JDOGeocellQueryEngine qe = new JDOGeocellQueryEngine();
-		qe.setPersistenceManager(pm);
-		List<GeneralUser> results = GeocellManager.proximitySearch(center, 100000000, radius, GeneralUser.class, baseQuery, qe, DEFAULT_SEARCH_RESOlUTION);
-		return results;
-	}
 
-	private List<GeneralPlace> requestDatastoreForPlaces(double longitude,double latitude,long radius){
-		GeocellQuery baseQuery = new GeocellQuery();
-		Point center = new Point (latitude, longitude);
-		JDOGeocellQueryEngine qe = new JDOGeocellQueryEngine();
-		qe.setPersistenceManager(pm);
-		List<GeneralPlace> results = GeocellManager.proximitySearch(center, 100000000, radius, GeneralPlace.class, baseQuery, qe, DEFAULT_SEARCH_RESOlUTION);
-		return results;
-	}
 }
 
 
